@@ -1,4 +1,4 @@
-import type { Ref } from 'react';
+import { useId, type Ref } from 'react';
 import type { Question } from '../../types';
 import { Button } from '../common/Button';
 import AnswerChoice from './AnswerChoice';
@@ -28,6 +28,7 @@ function CardFront({
   onFlip,
   headingRef,
 }: CardFrontProps) {
+  const progressId = useId();
   const progressLabel =
     totalQuestions === null
       ? `Question ${questionNumber}`
@@ -35,8 +36,11 @@ function CardFront({
 
   return (
     <>
-      <p className={styles.meta}>{progressLabel}</p>
-      <h2 ref={headingRef} tabIndex={-1} className={styles.problem}>
+      <p id={progressId} className={styles.meta}>
+        {progressLabel}
+      </p>
+      {/* Described by the question number, so it is read when focus moves here */}
+      <h2 ref={headingRef} tabIndex={-1} className={styles.problem} aria-describedby={progressId}>
         {question.displayText} = ?
       </h2>
       <div className={styles.choices} role="group" aria-label="Answer choices">

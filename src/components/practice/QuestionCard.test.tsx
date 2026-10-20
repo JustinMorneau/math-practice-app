@@ -52,6 +52,14 @@ describe('QuestionCard front', () => {
     expect(choices.map((choice) => choice.textContent)).toEqual(['48', '54', '56', '64']);
   });
 
+  it('describes the problem with the question number for screen readers', () => {
+    renderCard();
+
+    expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).toHaveAccessibleDescription(
+      'Question 3 of 10',
+    );
+  });
+
   it('shows only the question number in continuous practice', () => {
     renderCard({ totalQuestions: null });
 
