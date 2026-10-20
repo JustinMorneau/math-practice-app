@@ -6,8 +6,8 @@
 
 - [x] Create a new React project using Vite.
 - [x] Configure TypeScript.
-- [ ] Install project dependencies.
-- [ ] Confirm that the development server runs.
+- [x] Install project dependencies.
+- [x] Confirm that the development server runs.
 - [x] Remove the default Vite demonstration content.
 - [x] Create the initial application folder structure.
 
@@ -28,7 +28,7 @@ npm run dev
 - [x] Install Vitest.
 - [x] Install React Testing Library.
 - [x] Create one basic component test.
-- [ ] Confirm that tests run successfully.
+- [x] Confirm that tests run successfully.
 
 ### 3. Define Shared TypeScript Types
 
@@ -58,29 +58,29 @@ src/types/
 
 ### 4. Create the Shared Page Layout
 
-- [ ] Create a reusable page container.
-- [ ] Create the application header.
-- [ ] Add the application title.
-- [ ] Create a basic navigation component.
-- [ ] Add responsive page spacing.
-- [ ] Add child-friendly font sizes.
-- [ ] Add a consistent button style.
+- [x] Create a reusable page container.
+- [x] Create the application header.
+- [x] Add the application title.
+- [x] Create a basic navigation component.
+- [x] Add responsive page spacing.
+- [x] Add child-friendly font sizes.
+- [x] Add a consistent button style.
 
 ### 5. Create the Home Page
 
-- [ ] Add a welcome message.
-- [ ] Add a **Start Practice** button.
-- [ ] Add a **View Statistics** button.
-- [ ] Add a **Settings** button.
-- [ ] Make all buttons keyboard accessible.
-- [ ] Add responsive styling for small screens.
+- [x] Add a welcome message.
+- [x] Add a **Start Practice** button.
+- [x] Add a **View Statistics** button.
+- [x] Add a **Settings** button.
+- [x] Make all buttons keyboard accessible.
+- [x] Add responsive styling for small screens.
 
 ### 6. Add Application Routing
 
-- [ ] Install React Router.
-- [ ] Create the application routes.
-- [ ] Connect the home-page buttons to their routes.
-- [ ] Add a fallback page for unknown routes.
+- [x] Install React Router.
+- [x] Create the application routes.
+- [x] Connect the home-page buttons to their routes.
+- [x] Add a fallback page for unknown routes.
 
 Initial routes:
 
