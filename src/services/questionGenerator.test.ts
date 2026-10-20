@@ -10,13 +10,18 @@ import {
 import { getProblemErrors } from './problemValidation';
 import {
   createFallbackProblem,
+  createProblem,
+  createQuestion,
   generateAdditionProblem,
   generateDivisionProblem,
   generateMultiplicationProblem,
   generateProblem,
   generateProblemForOperations,
+  generateQuestion,
+  generateQuestionForOperations,
   generateSubtractionProblem,
 } from './questionGenerator';
+import { getQuestionErrors } from './questionValidation';
 
 const SAMPLES = 500;
 
@@ -211,5 +216,82 @@ describe('generateProblemForOperations', () => {
 
   it('rejects an empty list of operations', () => {
     expect(() => generateProblemForOperations([], 1)).toThrow(RangeError);
+  });
+});
+
+describe('createQuestion', () => {
+  const problem = createProblem('multiplication', 2, 7, 8);
+
+  it('adds an id, four shuffled choices, and the regular source', () => {
+    const question = createQuestion(problem, { random: createSeededRandom(1) });
+
+    expect(question).toMatchObject(problem);
+    expect(question.id).toMatch(/^q-/);
+    expect(question.source).toBe('regular');
+    expect(question.mistakePatternId).toBeUndefined();
+    expect(getQuestionErrors(question)).toEqual([]);
+  });
+
+  it('labels mistake-review questions with their pattern', () => {
+    const question = createQuestion(problem, {
+      source: 'mistake-review',
+      mistakePatternId: 'm-1',
+    });
+
+    expect(question.source).toBe('mistake-review');
+    expect(question.mistakePatternId).toBe('m-1');
+  });
+
+  it('gives each question its own id', () => {
+    expect(createQuestion(problem).id).not.toBe(createQuestion(problem).id);
+  });
+});
+
+describe('generateQuestion', () => {
+  describe.each(MATH_OPERATIONS)('%s', (operation) => {
+    it.each(DIFFICULTY_LEVELS)('produces valid questions at level %i', (level) => {
+      const random = createSeededRandom(level * 7);
+      for (let i = 0; i < 200; i += 1) {
+        const question = generateQuestion(operation, level, random);
+        expect(question.operation).toBe(operation);
+        expect(getQuestionErrors(question)).toEqual([]);
+      }
+    });
+  });
+
+  it('puts the correct answer in every position about equally often', () => {
+    const random = createSeededRandom(21);
+    const runs = 4000;
+    const positionCounts = [0, 0, 0, 0];
+    for (let i = 0; i < runs; i += 1) {
+      const question = generateQuestion('multiplication', 2, random);
+      positionCounts[question.choices.indexOf(question.correctAnswer)] += 1;
+    }
+    for (const count of positionCounts) {
+      expect(count / runs).toBeGreaterThan(0.2);
+      expect(count / runs).toBeLessThan(0.3);
+    }
+  });
+
+  it('still returns a valid question when the random source is broken', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const question = generateQuestion('division', 3, () => Number.NaN);
+
+    expect(getQuestionErrors(question)).toEqual([]);
+  });
+});
+
+describe('generateQuestionForOperations', () => {
+  it('only uses the selected operations', () => {
+    const random = createSeededRandom(22);
+    for (let i = 0; i < 200; i += 1) {
+      const question = generateQuestionForOperations(['addition', 'multiplication'], 1, random);
+      expect(['addition', 'multiplication']).toContain(question.operation);
+    }
+  });
+
+  it('rejects an empty list of operations', () => {
+    expect(() => generateQuestionForOperations([], 1)).toThrow(RangeError);
   });
 });

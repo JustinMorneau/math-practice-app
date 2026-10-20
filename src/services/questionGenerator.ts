@@ -2,8 +2,8 @@
  * Generates arithmetic problems that follow the difficulty rules
  * (specification sections 7, 9, and 20.1).
  *
- * Phase 4 produces MathProblems. Phase 5 adds answer choices and an ID to
- * turn each problem into a complete Question.
+ * Problems are generated first (operands, answer, and display text); answer
+ * choices and an ID are then added to make a complete Question.
  */
 import {
   DIFFICULTY_RULES,
@@ -13,13 +13,30 @@ import {
   type NumberRange,
   type SubtractionRules,
 } from '../constants/difficultyRules';
-import type { DifficultyLevel, MathOperation, MathProblem } from '../types';
+import type {
+  DifficultyLevel,
+  MathOperation,
+  MathProblem,
+  Question,
+  QuestionSource,
+} from '../types';
 import { formatProblemText } from '../utils/format';
+import { createId } from '../utils/ids';
 import { calculateAnswer, pickRandom, randomInt, type RandomSource } from '../utils/math';
+import { shuffle } from '../utils/shuffle';
+import { generateDistractors } from './distractors';
 import { getProblemErrors } from './problemValidation';
+import { getQuestionErrors } from './questionValidation';
 
 /** How many times to retry before falling back to a known-good problem. */
 export const MAX_GENERATION_ATTEMPTS = 10;
+
+/** Logs generation problems during development without exposing them to students. */
+function reportGenerationFailure(message: string, detail: unknown): void {
+  if (import.meta.env.DEV) {
+    console.error(message, detail);
+  }
+}
 
 function randomInRange({ min, max }: NumberRange, random: RandomSource): number {
   return randomInt(min, max, random);
@@ -130,13 +147,11 @@ export function generateProblem(
     }
   }
 
-  if (import.meta.env.DEV) {
-    console.error(
-      `Could not generate a valid ${operation} problem for level ${difficulty} after ` +
-        `${MAX_GENERATION_ATTEMPTS} attempts. Using a fallback problem.`,
-      lastFailure,
-    );
-  }
+  reportGenerationFailure(
+    `Could not generate a valid ${operation} problem for level ${difficulty} after ` +
+      `${MAX_GENERATION_ATTEMPTS} attempts. Using a fallback problem.`,
+    lastFailure,
+  );
   return createFallbackProblem(operation, difficulty);
 }
 
@@ -191,4 +206,76 @@ export function createFallbackProblem(
       return createProblem(operation, difficulty, divisor.min * quotient.min, divisor.min);
     }
   }
+}
+
+// ---------- Complete questions ----------
+
+export interface CreateQuestionOptions {
+  source?: QuestionSource;
+  /** The mistake pattern a review question was generated from. */
+  mistakePatternId?: string;
+  random?: RandomSource;
+}
+
+/**
+ * Turns a problem into a multiple-choice question: the correct answer plus
+ * three distractors, shuffled so the correct answer can be in any position.
+ */
+export function createQuestion(
+  problem: MathProblem,
+  { source = 'regular', mistakePatternId, random = Math.random }: CreateQuestionOptions = {},
+): Question {
+  const choices = shuffle([problem.correctAnswer, ...generateDistractors(problem, random)], random);
+  return {
+    ...problem,
+    id: createId('q'),
+    choices,
+    source,
+    ...(mistakePatternId === undefined ? {} : { mistakePatternId }),
+  };
+}
+
+/**
+ * A complete, validated question for the given operation and level
+ * (specification section 20.1). If the answer choices ever fail validation,
+ * the question falls back to the answer and the next three numbers.
+ */
+export function generateQuestion(
+  operation: MathOperation,
+  difficulty: DifficultyLevel,
+  random: RandomSource = Math.random,
+): Question {
+  const problem = generateProblem(operation, difficulty, random);
+
+  try {
+    const question = createQuestion(problem, { random });
+    const errors = getQuestionErrors(question);
+    if (errors.length === 0) {
+      return question;
+    }
+    reportGenerationFailure(`Invalid answer choices for ${problem.displayText}.`, errors);
+  } catch (error) {
+    reportGenerationFailure(`Could not create answer choices for ${problem.displayText}.`, error);
+  }
+
+  const answer = problem.correctAnswer;
+  return {
+    ...problem,
+    id: createId('q'),
+    // Math.random rather than `random`, in case the provided source is the problem.
+    choices: shuffle([answer, answer + 1, answer + 2, answer + 3]),
+    source: 'regular',
+  };
+}
+
+/** A complete question for one of the enabled operations, chosen at random. */
+export function generateQuestionForOperations(
+  operations: readonly MathOperation[],
+  difficulty: DifficultyLevel,
+  random: RandomSource = Math.random,
+): Question {
+  if (operations.length === 0) {
+    throw new RangeError('At least one operation must be selected to generate a question.');
+  }
+  return generateQuestion(pickRandom(operations, random), difficulty, random);
 }
