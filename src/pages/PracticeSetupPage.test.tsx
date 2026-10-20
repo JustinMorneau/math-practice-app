@@ -59,9 +59,8 @@ describe('PracticeSetupPage', () => {
     await user.click(getStartButton());
 
     expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument();
-    expect(screen.getByText('Addition and Multiplication')).toBeInTheDocument();
-    expect(screen.getByText('Intermediate')).toBeInTheDocument();
-    expect(screen.getByText('20 questions')).toBeInTheDocument();
+    expect(screen.getByText('Addition and Multiplication, Intermediate level')).toBeInTheDocument();
+    expect(screen.getByText('Question 1 of 20')).toBeInTheDocument();
   });
 
   it('passes mixed operations and continuous practice', async () => {
@@ -73,8 +72,8 @@ describe('PracticeSetupPage', () => {
     await user.click(getStartButton());
 
     expect(
-      screen.getByText('Addition, Subtraction, Multiplication, and Division'),
+      screen.getByText('Addition, Subtraction, Multiplication, and Division, Beginner level'),
     ).toBeInTheDocument();
-    expect(screen.getByText('No limit')).toBeInTheDocument();
+    expect(screen.getByText('Question 1')).toBeInTheDocument();
   });
 });

@@ -1,17 +1,12 @@
-.summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4) var(--space-8);
-  margin: 0;
-}
-
-.summary dt {
-  font-size: var(--text-sm);
-  color: var(--color-ink-soft);
-}
-
-.summary dd {
-  margin: 0;
-  font-size: var(--text-lg);
+.details {
+  margin: 0 auto;
   font-weight: 600;
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-4);
 }
