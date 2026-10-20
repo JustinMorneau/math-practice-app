@@ -1,0 +1,17 @@
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-8);
+  margin: 0;
+}
+
+.summary dt {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}

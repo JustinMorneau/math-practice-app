@@ -1,0 +1,49 @@
+.intro {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--color-ink-soft);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-block: var(--space-2) var(--space-4);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 2px dashed var(--color-grid);
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 600;
+}
+
+.messageIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-sun);
+  border: var(--border-chunky);
+  border-radius: 50%;
+}
+
+/* Full-width Start button on phones */
+@media (max-width: 30rem) {
+  .footer > button {
+    width: 100%;
+  }
+}
