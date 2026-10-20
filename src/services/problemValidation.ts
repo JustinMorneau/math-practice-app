@@ -87,9 +87,7 @@ export function matchesDifficulty({
     }
     case 'division': {
       const { divisor, quotient } = rules.division;
-      return (
-        isInRange(secondOperand, divisor) && isInRange(firstOperand / secondOperand, quotient)
-      );
+      return isInRange(secondOperand, divisor) && isInRange(firstOperand / secondOperand, quotient);
     }
     default:
       return false;

@@ -1,0 +1,328 @@
+From c80500e1feca4b7fb58bef31229400d33bd0c9e4 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 20 Oct 2026 21:06:22 +0000
+Subject: [PATCH 1/4] feat(utils): add random integer, shuffle, and unique ID
+ utilities
+
+- randomInt and pickRandom accept an optional random source so tests
+  can use a seeded generator
+- calculateAnswer computes the exact result for each operation
+- shuffle uses Fisher-Yates and returns a new array
+- createId falls back when crypto.randomUUID is unavailable, which
+  happens when the dev server is opened over plain HTTP from a tablet
+- Add a seeded random generator for repeatable tests
+- Add unit tests for each utility
+---
+ src/test/random.ts        | 22 ++++++++++++
+ src/utils/ids.test.ts     | 30 ++++++++++++++++
+ src/utils/ids.ts          | 24 +++++++++++++
+ src/utils/math.test.ts    | 74 +++++++++++++++++++++++++++++++++++++++
+ src/utils/math.ts         | 47 +++++++++++++++++++++++++
+ src/utils/shuffle.test.ts | 41 ++++++++++++++++++++++
+ src/utils/shuffle.ts      | 14 ++++++++
+ 7 files changed, 252 insertions(+)
+ create mode 100644 src/test/random.ts
+ create mode 100644 src/utils/ids.test.ts
+ create mode 100644 src/utils/ids.ts
+ create mode 100644 src/utils/math.test.ts
+ create mode 100644 src/utils/math.ts
+ create mode 100644 src/utils/shuffle.test.ts
+ create mode 100644 src/utils/shuffle.ts
+
+diff --git a/src/test/random.ts b/src/test/random.ts
+new file mode 100644
+index 0000000..bcb7bca
+--- /dev/null
++++ b/src/test/random.ts
+@@ -0,0 +1,22 @@
++import type { RandomSource } from '../utils/math';
++
++/**
++ * A small seeded pseudo-random generator (mulberry32). The same seed always
++ * produces the same sequence, which keeps randomized tests repeatable.
++ */
++export function createSeededRandom(seed: number): RandomSource {
++  let state = seed >>> 0;
++  return () => {
++    state = (state + 0x6d2b79f5) >>> 0;
++    let value = state;
++    value = Math.imul(value ^ (value >>> 15), value | 1);
++    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
++    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
++  };
++}
++
++/** Always picks the lowest possible value. */
++export const alwaysLowest: RandomSource = () => 0;
++
++/** Always picks the highest possible value. */
++export const alwaysHighest: RandomSource = () => 0.999_999_999;
+diff --git a/src/utils/ids.test.ts b/src/utils/ids.test.ts
+new file mode 100644
+index 0000000..8e5da23
+--- /dev/null
++++ b/src/utils/ids.test.ts
+@@ -0,0 +1,30 @@
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { createId } from './ids';
++
++describe('createId', () => {
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('returns a non-empty string', () => {
++    expect(createId()).toMatch(/\S+/);
++  });
++
++  it('adds a prefix when given one', () => {
++    expect(createId('q')).toMatch(/^q-\S+$/);
++  });
++
++  it('does not repeat', () => {
++    const ids = new Set(Array.from({ length: 1000 }, () => createId()));
++    expect(ids.size).toBe(1000);
++  });
++
++  it('still creates unique ids when crypto.randomUUID is unavailable', () => {
++    vi.stubGlobal('crypto', {});
++    const ids = new Set(Array.from({ length: 1000 }, () => createId('s')));
++    expect(ids.size).toBe(1000);
++    for (const id of ids) {
++      expect(id).toMatch(/^s-\S+$/);
++    }
++  });
++});
+diff --git a/src/utils/ids.ts b/src/utils/ids.ts
+new file mode 100644
+index 0000000..8df7506
+--- /dev/null
++++ b/src/utils/ids.ts
+@@ -0,0 +1,24 @@
++let fallbackCounter = 0;
++
++/**
++ * A unique ID such as `"q-3f2b…"`, optionally with a readable prefix.
++ *
++ * Uses crypto.randomUUID when available. Browsers only provide it on secure
++ * pages (HTTPS or localhost), so opening the dev server from a tablet by IP
++ * address over plain HTTP uses the fallback instead.
++ */
++export function createId(prefix?: string): string {
++  const unique =
++    typeof globalThis.crypto?.randomUUID === 'function'
++      ? globalThis.crypto.randomUUID()
++      : createFallbackId();
++  return prefix ? `${prefix}-${unique}` : unique;
++}
++
++function createFallbackId(): string {
++  fallbackCounter += 1;
++  const time = Date.now().toString(36);
++  const count = fallbackCounter.toString(36);
++  const randomPart = Math.random().toString(36).slice(2, 10);
++  return `${time}-${count}-${randomPart}`;
++}
+diff --git a/src/utils/math.test.ts b/src/utils/math.test.ts
+new file mode 100644
+index 0000000..02105e2
+--- /dev/null
++++ b/src/utils/math.test.ts
+@@ -0,0 +1,74 @@
++import { describe, expect, it } from 'vitest';
++import { alwaysHighest, alwaysLowest, createSeededRandom } from '../test/random';
++import { calculateAnswer, pickRandom, randomInt } from './math';
++
++describe('randomInt', () => {
++  it('returns the minimum when the random source is at its lowest', () => {
++    expect(randomInt(3, 9, alwaysLowest)).toBe(3);
++  });
++
++  it('returns the maximum when the random source is at its highest', () => {
++    expect(randomInt(3, 9, alwaysHighest)).toBe(9);
++  });
++
++  it('returns min when min equals max', () => {
++    expect(randomInt(7, 7)).toBe(7);
++  });
++
++  it('only returns whole numbers in range, and reaches every value', () => {
++    const random = createSeededRandom(1);
++    const seen = new Set<number>();
++    for (let i = 0; i < 1000; i += 1) {
++      const value = randomInt(-2, 4, random);
++      expect(Number.isInteger(value)).toBe(true);
++      expect(value).toBeGreaterThanOrEqual(-2);
++      expect(value).toBeLessThanOrEqual(4);
++      seen.add(value);
++    }
++    expect([...seen].sort((a, b) => a - b)).toEqual([-2, -1, 0, 1, 2, 3, 4]);
++  });
++
++  it('rejects min greater than max', () => {
++    expect(() => randomInt(5, 1)).toThrow(RangeError);
++  });
++
++  it('rejects bounds that are not whole numbers', () => {
++    expect(() => randomInt(0.5, 3)).toThrow(RangeError);
++    expect(() => randomInt(0, Number.NaN)).toThrow(RangeError);
++  });
++});
++
++describe('pickRandom', () => {
++  it('returns an item from the list', () => {
++    const items = ['a', 'b', 'c'];
++    expect(items).toContain(pickRandom(items, createSeededRandom(2)));
++  });
++
++  it('can return every item', () => {
++    const random = createSeededRandom(3);
++    const seen = new Set<string>();
++    for (let i = 0; i < 200; i += 1) {
++      seen.add(pickRandom(['a', 'b', 'c'], random));
++    }
++    expect(seen.size).toBe(3);
++  });
++
++  it('rejects an empty list', () => {
++    expect(() => pickRandom([])).toThrow(RangeError);
++  });
++});
++
++describe('calculateAnswer', () => {
++  it.each([
++    ['addition', 7, 8, 15],
++    ['subtraction', 15, 8, 7],
++    ['multiplication', 7, 8, 56],
++    ['division', 56, 7, 8],
++  ] as const)('calculates %s of %i and %i', (operation, first, second, expected) => {
++    expect(calculateAnswer(operation, first, second)).toBe(expected);
++  });
++
++  it('returns a fraction for uneven division so validation can reject it', () => {
++    expect(calculateAnswer('division', 7, 2)).toBe(3.5);
++  });
++});
+diff --git a/src/utils/math.ts b/src/utils/math.ts
+new file mode 100644
+index 0000000..bdd3e5d
+--- /dev/null
++++ b/src/utils/math.ts
+@@ -0,0 +1,47 @@
++import type { MathOperation } from '../types';
++
++/**
++ * A function returning a number in [0, 1), like Math.random.
++ * Generators accept one so tests can use a predictable, seeded source.
++ */
++export type RandomSource = () => number;
++
++/** A random whole number from `min` to `max`, inclusive. */
++export function randomInt(min: number, max: number, random: RandomSource = Math.random): number {
++  if (!Number.isInteger(min) || !Number.isInteger(max)) {
++    throw new RangeError(`randomInt needs whole-number bounds, got ${min} and ${max}.`);
++  }
++  if (min > max) {
++    throw new RangeError(`randomInt needs min <= max, got ${min} and ${max}.`);
++  }
++  return Math.floor(random() * (max - min + 1)) + min;
++}
++
++/** A random item from a non-empty list. */
++export function pickRandom<T>(items: readonly T[], random: RandomSource = Math.random): T {
++  if (items.length === 0) {
++    throw new RangeError('pickRandom needs at least one item.');
++  }
++  return items[randomInt(0, items.length - 1, random)];
++}
++
++/**
++ * The exact result of `first <operation> second`. Division may return a
++ * fraction; question validation rejects those.
++ */
++export function calculateAnswer(operation: MathOperation, first: number, second: number): number {
++  switch (operation) {
++    case 'addition':
++      return first + second;
++    case 'subtraction':
++      return first - second;
++    case 'multiplication':
++      return first * second;
++    case 'division':
++      return first / second;
++    default: {
++      const unsupported: never = operation;
++      throw new Error(`Unsupported operation: ${String(unsupported)}`);
++    }
++  }
++}
+diff --git a/src/utils/shuffle.test.ts b/src/utils/shuffle.test.ts
+new file mode 100644
+index 0000000..15675bf
+--- /dev/null
++++ b/src/utils/shuffle.test.ts
+@@ -0,0 +1,41 @@
++import { describe, expect, it } from 'vitest';
++import { createSeededRandom } from '../test/random';
++import { shuffle } from './shuffle';
++
++describe('shuffle', () => {
++  it('returns the same items', () => {
++    const items = [48, 54, 56, 64];
++    const result = shuffle(items, createSeededRandom(1));
++    expect([...result].sort((a, b) => a - b)).toEqual(items);
++  });
++
++  it('does not change the original list', () => {
++    const items = [1, 2, 3, 4];
++    shuffle(items, createSeededRandom(2));
++    expect(items).toEqual([1, 2, 3, 4]);
++  });
++
++  it('returns a new array', () => {
++    const items = [1, 2, 3];
++    expect(shuffle(items)).not.toBe(items);
++  });
++
++  it('handles empty and single-item lists', () => {
++    expect(shuffle([])).toEqual([]);
++    expect(shuffle(['only'])).toEqual(['only']);
++  });
++
++  it('moves an item to every position with roughly equal frequency', () => {
++    const random = createSeededRandom(42);
++    const runs = 4000;
++    const positionCounts = [0, 0, 0, 0];
++    for (let i = 0; i < runs; i += 1) {
++      positionCounts[shuffle(['target', 'b', 'c', 'd'], random).indexOf('target')] += 1;
++    }
++    // Each of the 4 positions should get about 25% of runs.
++    for (const count of positionCounts) {
++      expect(count / runs).toBeGreaterThan(0.2);
++      expect(count / runs).toBeLessThan(0.3);
++    }
++  });
++});
+diff --git a/src/utils/shuffle.ts b/src/utils/shuffle.ts
+new file mode 100644
+index 0000000..5088ed3
+--- /dev/null
++++ b/src/utils/shuffle.ts
+@@ -0,0 +1,14 @@
++import { randomInt, type RandomSource } from './math';
++
++/**
++ * Returns a shuffled copy of `items` using the Fisher–Yates algorithm, which
++ * gives every order an equal chance. The original list is not changed.
++ */
++export function shuffle<T>(items: readonly T[], random: RandomSource = Math.random): T[] {
++  const result = [...items];
++  for (let index = result.length - 1; index > 0; index -= 1) {
++    const swapIndex = randomInt(0, index, random);
++    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
++  }
++  return result;
++}
+-- 
+2.43.0
+
