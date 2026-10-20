@@ -163,6 +163,17 @@ describe('QuestionCard behavior', () => {
     expect(onResult).toHaveBeenCalledWith({ selectedAnswer: 56, selfReportedCorrect: true });
   });
 
+  it('works the same with animation turned off', async () => {
+    const { user, onResult } = renderCard({ animated: false });
+
+    await user.click(getChoice('48'));
+    await user.click(getFlipButton());
+    expect(screen.getByRole('heading', { name: '7 × 8 = 56' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }));
+
+    expect(onResult).toHaveBeenCalledWith({ selectedAnswer: 48, selfReportedCorrect: false });
+  });
+
   it('can move focus to the problem when it appears', () => {
     renderCard({ focusOnMount: true });
 

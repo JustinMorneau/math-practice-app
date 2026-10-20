@@ -1,14 +1,21 @@
-/* ---------- Card ---------- */
+/* ---------- Card and flip ---------- */
 .scene {
   width: 100%;
   max-width: 34rem;
   margin-inline: auto;
+  perspective: 1400px;
 }
 
 /* Both faces share one grid cell, so the card is always as tall as its
    taller face and the two sides stay perfectly aligned. */
 .card {
   display: grid;
+  transform-style: preserve-3d;
+  transition: transform 550ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.flipped {
+  transform: rotateY(180deg);
 }
 
 .face {
@@ -21,10 +28,14 @@
   border: 3px solid var(--color-ink);
   border-radius: 1.25rem;
   box-shadow: 0 8px 0 var(--color-ink);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
+/* The back is pre-rotated so it reads normally once the card turns over. */
 .back {
   background: var(--color-sun-soft);
+  transform: rotateY(180deg);
 }
 
 @media (min-width: 30rem) {
@@ -33,9 +44,21 @@
   }
 }
 
-/* Only the face toward the student is shown. */
-.face[aria-hidden='true'] {
+/* Without animation, switch faces instantly and hide the one turned away. */
+.static .card,
+.static .back {
+  transform: none;
+  transition: none;
+}
+
+.static .face[aria-hidden='true'] {
   visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
 }
 
 /* ---------- Content shared by both faces ---------- */

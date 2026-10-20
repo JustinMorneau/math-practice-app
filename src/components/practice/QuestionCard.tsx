@@ -16,6 +16,8 @@ interface QuestionCardProps {
   totalQuestions: number | null;
   /** Called once, after the student reports whether they got it right. */
   onResult: (result: CardResult) => void;
+  /** Animate the flip. When false (or with reduced motion), faces switch instantly. */
+  animated?: boolean;
   /** Move keyboard focus to the problem when the card appears (for every card after the first). */
   focusOnMount?: boolean;
 }
@@ -35,6 +37,7 @@ function QuestionCard({
   questionNumber,
   totalQuestions,
   onResult,
+  animated = true,
   focusOnMount = false,
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -72,9 +75,12 @@ function QuestionCard({
     }
   }
 
+  const sceneClassName = animated ? styles.scene : `${styles.scene} ${styles.static}`;
+  const cardClassName = isFlipped ? `${styles.card} ${styles.flipped}` : styles.card;
+
   return (
-    <div className={styles.scene}>
-      <div className={styles.card} data-flipped={isFlipped}>
+    <div className={sceneClassName}>
+      <div className={cardClassName} data-flipped={isFlipped}>
         <section
           className={`${styles.face} ${styles.front}`}
           aria-label="Question"
