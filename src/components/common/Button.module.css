@@ -1,0 +1,62 @@
+/* Medium size is the base .button sizing; .large overrides it.
+   Chunky "counting block" buttons: a solid ink edge underneath that
+   disappears when pressed, so every tap has a visible pressed state. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-6);
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+  box-shadow: 0 var(--block-depth) 0 var(--color-ink);
+  cursor: pointer;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    background-color 120ms ease-out;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(var(--block-depth));
+  box-shadow: 0 0 0 var(--color-ink);
+}
+
+.button:disabled {
+  color: var(--color-ink-soft);
+  background: var(--color-disabled);
+  border-color: var(--color-disabled-edge);
+  box-shadow: 0 var(--block-depth) 0 var(--color-disabled-edge);
+  cursor: not-allowed;
+}
+
+.primary {
+  color: #ffffff;
+  background: var(--color-blue);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-blue-dark);
+}
+
+.secondary {
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-sun-soft);
+}
+
+.large {
+  min-height: 4rem;
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-lg);
+}

@@ -1,18 +1,133 @@
-/* Minimal global base styles. The child-friendly theme is built in Phase 2. */
+/*
+ * Global theme: a math-notebook page with chunky counting-block accents.
+ * Component styles live in co-located *.module.css files and use these tokens.
+ */
+:root {
+  /* Color */
+  --color-ink: #1f2a44;
+  --color-ink-soft: #4a5672;
+  --color-paper: #f7faff;
+  --color-grid: #dde7f6;
+  --color-surface: #ffffff;
+  --color-blue: #2d5be3;
+  --color-blue-dark: #1e44b8;
+  --color-sun: #ffc93c;
+  --color-sun-soft: #fff4d1;
+  --color-red: #e5483d;
+  --color-green: #1f9d63;
+  --color-disabled: #e6ebf3;
+  --color-disabled-edge: #b8c2d6;
+
+  /* Type — large base size for young readers */
+  --font-body: 'Lexend Variable', 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-sm: 1rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* Shape */
+  --radius-block: 0.75rem;
+  --radius-small: 0.375rem;
+  --border-chunky: 2px solid var(--color-ink);
+  --block-depth: 4px;
+  --content-width: 60rem;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-:root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 body {
   margin: 0;
   min-height: 100vh;
+  font-size: var(--text-base);
+  /* Graph-paper grid */
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(to right, var(--color-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--space-4);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+
+h2 {
+  font-size: var(--text-xl);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: 60ch;
+}
+
+a {
+  color: var(--color-blue-dark);
+}
+
+/* One consistent, high-contrast focus ring for every interactive element */
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 10;
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  color: var(--color-ink);
+  background: var(--color-sun);
+  border: var(--border-chunky);
+  border-radius: var(--radius-small);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

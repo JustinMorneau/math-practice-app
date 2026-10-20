@@ -53,3 +53,17 @@ src/
 ```
 
 Empty folders contain a `.gitkeep` placeholder until they receive real files.
+
+## Routes
+
+| Path                | Page                                   |
+| ------------------- | -------------------------------------- |
+| `/`                 | Home                                   |
+| `/practice/setup`   | Practice setup (`/practice` redirects) |
+| `/practice/session` | Practice session                       |
+| `/practice/summary` | Session summary                        |
+| `/statistics`       | Statistics                             |
+| `/settings`         | Settings                               |
+
+Any other path shows a "Page not found" screen. Route paths are defined once
+in `src/app/routes.ts`.

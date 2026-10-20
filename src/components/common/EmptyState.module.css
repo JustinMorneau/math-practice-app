@@ -1,0 +1,15 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-6);
+  background: var(--color-surface);
+  border: 2px dashed var(--color-ink-soft);
+  border-radius: var(--radius-block);
+}
+
+.message {
+  margin: 0;
+  font-size: var(--text-lg);
+}

@@ -1,0 +1,62 @@
+.header {
+  background: var(--color-surface);
+  border-bottom: var(--border-chunky);
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+  border-radius: var(--radius-small);
+}
+
+/* Tiny 2×2 stack of operation blocks */
+.mark {
+  display: grid;
+  grid-template-columns: repeat(2, 1.125rem);
+  grid-template-rows: repeat(2, 1.125rem);
+  gap: 2px;
+}
+
+.mark > span {
+  display: grid;
+  place-items: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  border-radius: 3px;
+}
+
+.plus {
+  background: var(--color-red);
+}
+
+.minus {
+  background: var(--color-blue);
+}
+
+.times {
+  background: var(--color-green);
+}
+
+.mark > .divide {
+  color: var(--color-ink);
+  background: var(--color-sun);
+}

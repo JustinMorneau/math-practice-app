@@ -3,15 +3,11 @@ import { describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('App', () => {
-  it('renders the application title as the main heading', () => {
+  it('renders the home page at the root URL', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { level: 1, name: /math practice/i })).toBeInTheDocument();
-  });
-
-  it('renders a welcome message', () => {
-    render(<App />);
-
-    expect(screen.getByText(/get ready to practice/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /welcome to math practice/i }),
+    ).toBeInTheDocument();
   });
 });

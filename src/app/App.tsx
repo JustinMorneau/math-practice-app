@@ -1,15 +1,12 @@
-/**
- * Root application component.
- *
- * Placeholder for Phase 1. Routing, the shared layout, and the
- * AppProvider context are added in Phase 2.
- */
+import { BrowserRouter } from 'react-router';
+import AppRoutes from './AppRoutes';
+
+/** Root component. Context providers (AppProvider) will wrap the routes in a later phase. */
 function App() {
   return (
-    <main>
-      <h1>Math Practice</h1>
-      <p>Get ready to practice addition, subtraction, multiplication, and division!</p>
-    </main>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 
