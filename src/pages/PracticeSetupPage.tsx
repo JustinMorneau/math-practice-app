@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { ROUTES } from '../app/routes';
+import { useLocation, useNavigate } from 'react-router';
+import { ROUTES, type PracticeSetupState } from '../app/routes';
 import { Button } from '../components/common/Button';
 import PageContainer from '../components/layout/PageContainer';
 import DifficultySelector from '../components/setup/DifficultySelector';
@@ -17,7 +17,10 @@ import styles from './PracticeSetupPage.module.css';
  */
 function PracticeSetupPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const messageId = useId();
+  const setupState = location.state as PracticeSetupState | null;
+  const showMissingSessionNotice = setupState?.notice === 'session-missing';
   const [config, setConfig] = useState<PracticeConfig>(DEFAULT_PRACTICE_CONFIG);
 
   // A difficulty and session length are always selected, so only the
@@ -32,6 +35,9 @@ function PracticeSetupPage() {
 
   return (
     <PageContainer title="Practice Setup">
+      {showMissingSessionNotice ? (
+        <p className={styles.notice}>Let's set up your practice first.</p>
+      ) : null}
       <p className={styles.intro}>Choose what to practice, then press Start Session.</p>
 
       <div className={styles.sections}>

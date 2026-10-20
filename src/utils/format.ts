@@ -13,12 +13,14 @@ export function formatDifficulty(difficulty: DifficultyLevel): string {
   return DIFFICULTY_DETAILS[difficulty].name;
 }
 
+/** "1 question" or "10 questions". */
+export function formatQuestionCount(count: number): string {
+  return count === 1 ? '1 question' : `${count} questions`;
+}
+
 /** "1 question", "10 questions", or "No limit" for continuous practice. */
 export function formatSessionLength(length: SessionLength): string {
-  if (length === 'continuous') {
-    return 'No limit';
-  }
-  return length === 1 ? '1 question' : `${length} questions`;
+  return length === 'continuous' ? 'No limit' : formatQuestionCount(length);
 }
 
 /** The question as shown on a card, e.g. "7 × 8" or "56 ÷ 7". */

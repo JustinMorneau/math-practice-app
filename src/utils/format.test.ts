@@ -3,6 +3,7 @@ import {
   formatDifficulty,
   formatOperationList,
   formatProblemText,
+  formatQuestionCount,
   formatSessionLength,
 } from './format';
 
@@ -30,6 +31,16 @@ describe('formatDifficulty', () => {
     [4, 'Advanced'],
   ] as const)('names level %s "%s"', (level, name) => {
     expect(formatDifficulty(level)).toBe(name);
+  });
+});
+
+describe('formatQuestionCount', () => {
+  it.each([
+    [0, '0 questions'],
+    [1, '1 question'],
+    [7, '7 questions'],
+  ])('formats %i as "%s"', (count, expected) => {
+    expect(formatQuestionCount(count)).toBe(expected);
   });
 });
 

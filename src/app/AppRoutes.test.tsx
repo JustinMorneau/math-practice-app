@@ -7,7 +7,6 @@ describe('AppRoutes', () => {
   it.each([
     [ROUTES.home, 'Welcome to Math Practice!'],
     [ROUTES.practiceSetup, 'Practice Setup'],
-    [ROUTES.practiceSession, 'Practice'],
     [ROUTES.practiceSummary, 'Session Summary'],
     [ROUTES.statistics, 'Statistics'],
     [ROUTES.settings, 'Settings'],
@@ -15,6 +14,12 @@ describe('AppRoutes', () => {
     renderAppAt(path);
 
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+  });
+
+  it('sends /practice/session to setup when no session was started', () => {
+    renderAppAt(ROUTES.practiceSession);
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Practice Setup' })).toBeInTheDocument();
   });
 
   it('redirects /practice to the practice setup page', () => {

@@ -16,6 +16,12 @@ describe('PracticeSetupPage', () => {
     expect(screen.getByRole('group', { name: 'How many questions?' })).toBeInTheDocument();
   });
 
+  it('shows no notice when opened normally', () => {
+    renderAppAt('/practice/setup');
+
+    expect(screen.queryByText("Let's set up your practice first.")).not.toBeInTheDocument();
+  });
+
   it('starts with sensible defaults so a session can begin right away', () => {
     renderAppAt('/practice/setup');
 
@@ -61,6 +67,7 @@ describe('PracticeSetupPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument();
     expect(screen.getByText('Addition and Multiplication, Intermediate level')).toBeInTheDocument();
     expect(screen.getByText('Question 1 of 20')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuemax', '20');
   });
 
   it('passes mixed operations and continuous practice', async () => {

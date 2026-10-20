@@ -10,3 +10,49 @@
   justify-content: center;
   padding-top: var(--space-4);
 }
+
+.confirm,
+.complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: var(--space-6);
+  text-align: center;
+  background: var(--color-surface);
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+}
+
+.confirm {
+  border-style: dashed;
+}
+
+.confirmPrompt,
+.complete h2 {
+  margin: 0;
+}
+
+.confirmPrompt {
+  font-weight: 600;
+}
+
+.confirmPrompt:focus,
+.complete h2:focus {
+  outline: none;
+}
+
+.completeTotals {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}

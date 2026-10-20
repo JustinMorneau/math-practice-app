@@ -13,3 +13,9 @@ export const ROUTES = {
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
+
+/** Router state the practice setup page understands. */
+export interface PracticeSetupState {
+  /** Set when the student was sent back because no valid session was found. */
+  notice?: 'session-missing';
+}
