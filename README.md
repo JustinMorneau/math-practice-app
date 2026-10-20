@@ -21,6 +21,23 @@ npm run dev
 
 Then open the URL Vite prints (usually http://localhost:5173).
 
+## Scripts
+
+| Command                | What it does                                        |
+| ---------------------- | --------------------------------------------------- |
+| `npm run dev`          | Start the development server with hot reload        |
+| `npm run build`        | Type-check and create a production build in `dist/` |
+| `npm run preview`      | Serve the production build locally                  |
+| `npm run typecheck`    | Run the TypeScript compiler without emitting files  |
+| `npm run lint`         | Run ESLint (`lint:fix` to auto-fix)                 |
+| `npm run format`       | Format all files with Prettier                      |
+| `npm run format:check` | Check formatting without writing (useful in CI)     |
+| `npm test`             | Run the Vitest suite once                           |
+| `npm run test:watch`   | Run Vitest in watch mode                            |
+
+Tests use Vitest with jsdom and React Testing Library. Test files live next to
+the code they test and are named `*.test.ts` / `*.test.tsx`.
+
 ## Project structure
 
 ```text
