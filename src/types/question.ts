@@ -22,22 +22,31 @@ export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number];
 /** Whether a question came from normal practice or from reviewing a past mistake. */
 export type QuestionSource = 'regular' | 'mistake-review';
 
-/** A single generated multiple-choice math question. */
-export interface Question {
-  id: string;
+/**
+ * The arithmetic part of a question: what is asked and its answer.
+ *
+ * For division, `firstOperand` is the dividend and `secondOperand` the
+ * divisor, so "56 ÷ 7" has firstOperand 56 and secondOperand 7.
+ */
+export interface MathProblem {
   operation: MathOperation;
   firstOperand: number;
   secondOperand: number;
-  /** Human-readable form of the question, e.g. "7 × 8". */
+  /** Human-readable form of the problem, e.g. "7 × 8". */
   displayText: string;
   correctAnswer: number;
+  difficulty: DifficultyLevel;
+}
+
+/** A single generated multiple-choice math question: a problem plus its answer choices. */
+export interface Question extends MathProblem {
+  id: string;
   /**
    * Exactly four unique, shuffled choices, one of which equals `correctAnswer`.
    * The count is enforced by question validation rather than a tuple type so
    * that array utilities such as shuffle can be used without casts.
    */
   choices: number[];
-  difficulty: DifficultyLevel;
   source: QuestionSource;
   /** Set only when `source` is `'mistake-review'`. */
   mistakePatternId?: string;

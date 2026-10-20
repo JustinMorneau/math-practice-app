@@ -20,3 +20,12 @@ export function formatSessionLength(length: SessionLength): string {
   }
   return length === 1 ? '1 question' : `${length} questions`;
 }
+
+/** The question as shown on a card, e.g. "7 × 8" or "56 ÷ 7". */
+export function formatProblemText(
+  operation: MathOperation,
+  firstOperand: number,
+  secondOperand: number,
+): string {
+  return `${firstOperand} ${OPERATION_DETAILS[operation].symbol} ${secondOperand}`;
+}

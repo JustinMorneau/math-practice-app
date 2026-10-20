@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatDifficulty, formatOperationList, formatSessionLength } from './format';
+import {
+  formatDifficulty,
+  formatOperationList,
+  formatProblemText,
+  formatSessionLength,
+} from './format';
 
 describe('formatOperationList', () => {
   it('formats one operation', () => {
@@ -39,5 +44,16 @@ describe('formatSessionLength', () => {
 
   it('describes continuous practice', () => {
     expect(formatSessionLength('continuous')).toBe('No limit');
+  });
+});
+
+describe('formatProblemText', () => {
+  it.each([
+    ['addition', 7, 8, '7 + 8'],
+    ['subtraction', 15, 8, '15 − 8'],
+    ['multiplication', 7, 8, '7 × 8'],
+    ['division', 56, 7, '56 ÷ 7'],
+  ] as const)('formats %s as "%s"', (operation, first, second, expected) => {
+    expect(formatProblemText(operation, first, second)).toBe(expected);
   });
 });
