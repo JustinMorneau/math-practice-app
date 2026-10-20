@@ -1,0 +1,29 @@
+/* Small versions of the home page's operation blocks */
+.symbol {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  border-radius: var(--radius-small);
+}
+
+.addition {
+  background: var(--color-red);
+}
+
+.subtraction {
+  background: var(--color-blue);
+}
+
+.multiplication {
+  background: var(--color-green);
+}
+
+.symbol.division {
+  color: var(--color-ink);
+  background: var(--color-sun);
+}
