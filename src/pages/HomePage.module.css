@@ -1,0 +1,83 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-2) var(--space-4);
+}
+
+/* The four operations as chunky, slightly scattered counting blocks */
+.blocks {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.block {
+  display: grid;
+  place-items: center;
+  width: clamp(3.25rem, 2.5rem + 3vw, 4.5rem);
+  aspect-ratio: 1;
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+  box-shadow: 0 var(--block-depth) 0 var(--color-ink);
+}
+
+.block:nth-child(odd) {
+  transform: rotate(-4deg);
+}
+
+.block:nth-child(even) {
+  transform: rotate(3deg);
+}
+
+.addition {
+  background: var(--color-red);
+}
+
+.subtraction {
+  background: var(--color-blue);
+}
+
+.multiplication {
+  background: var(--color-green);
+}
+
+.block.division {
+  color: var(--color-ink);
+  background: var(--color-sun);
+}
+
+.title {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.75rem);
+}
+
+.welcome {
+  max-width: 40ch;
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--color-ink-soft);
+}
+
+/* Stacked, full-width buttons on phones; a single row on wider screens */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 22rem;
+}
+
+@media (min-width: 40rem) {
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: none;
+  }
+}
