@@ -38,3 +38,11 @@ export interface PracticeSession {
   correct: number;
   incorrect: number;
 }
+
+/** The choices made on the practice setup page, used to start a session. */
+export interface PracticeConfig {
+  /** At least one operation, in the canonical MATH_OPERATIONS order. */
+  operations: MathOperation[];
+  difficulty: DifficultyLevel;
+  sessionLength: SessionLength;
+}

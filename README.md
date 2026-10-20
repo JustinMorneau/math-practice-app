@@ -43,12 +43,13 @@ the code they test and are named `*.test.ts` / `*.test.tsx`.
 ```text
 src/
 ├── app/          # App root, routes, and context provider
-├── components/   # Reusable UI (layout, practice, statistics, common)
+├── components/   # Reusable UI (layout, setup, practice, statistics, common)
+├── constants/    # Option labels, descriptions, and defaults
 ├── pages/        # One component per route
 ├── services/     # Question generation, statistics, storage
 ├── hooks/        # Custom React hooks
 ├── types/        # Shared TypeScript domain types
-├── utils/        # Small pure helpers (math, shuffle, ids, validation)
+├── utils/        # Small pure helpers (formatting, validation, math, ids)
 └── test/         # Test setup
 ```
 
