@@ -1,0 +1,108 @@
+/* ---------- Card ---------- */
+.scene {
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+/* Both faces share one grid cell, so the card is always as tall as its
+   taller face and the two sides stay perfectly aligned. */
+.card {
+  display: grid;
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-surface);
+  border: 3px solid var(--color-ink);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 0 var(--color-ink);
+}
+
+.back {
+  background: var(--color-sun-soft);
+}
+
+@media (min-width: 30rem) {
+  .face {
+    padding: var(--space-8);
+  }
+}
+
+/* Only the face toward the student is shown. */
+.face[aria-hidden='true'] {
+  visibility: hidden;
+}
+
+/* ---------- Content shared by both faces ---------- */
+.meta {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.problem {
+  margin: var(--space-2) 0;
+  font-size: clamp(2.75rem, 2rem + 4vw, 4.5rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Focus is moved here for screen readers; the heading isn't a control. */
+.problem:focus {
+  outline: none;
+}
+
+.wideButton {
+  width: 100%;
+}
+
+/* ---------- Front ---------- */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  padding-bottom: var(--block-depth);
+}
+
+@media (max-width: 20rem) {
+  .choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Back ---------- */
+.yourAnswer {
+  margin: 0;
+  font-size: var(--text-lg);
+  text-align: center;
+}
+
+.prompt {
+  margin: var(--space-2) 0 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.resultButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.resultButtons > button {
+  min-height: 3.5rem;
+}
+
+@media (max-width: 28rem) {
+  .resultButtons {
+    grid-template-columns: 1fr;
+  }
+}

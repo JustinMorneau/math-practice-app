@@ -1,0 +1,115 @@
+import { useEffect, useRef, useState } from 'react';
+import type { Question } from '../../types';
+import CardBack from './CardBack';
+import CardFront from './CardFront';
+import styles from './QuestionCard.module.css';
+
+export interface CardResult {
+  selectedAnswer: number;
+  selfReportedCorrect: boolean;
+}
+
+interface QuestionCardProps {
+  question: Question;
+  questionNumber: number;
+  /** Null for continuous practice. */
+  totalQuestions: number | null;
+  /** Called once, after the student reports whether they got it right. */
+  onResult: (result: CardResult) => void;
+  /** Move keyboard focus to the problem when the card appears (for every card after the first). */
+  focusOnMount?: boolean;
+}
+
+/**
+ * A flashcard: answer on the front, flip, then self-report on the back.
+ *
+ * Give each question its own `key` so the selected answer and flip state
+ * reset automatically for the next question.
+ *
+ * The face turned away is `inert` and `aria-hidden`, so it can't be focused,
+ * clicked, or read by screen readers. Flipping moves focus to the back's
+ * heading so the revealed answer is announced.
+ */
+function QuestionCard({
+  question,
+  questionNumber,
+  totalQuestions,
+  onResult,
+  focusOnMount = false,
+}: QuestionCardProps) {
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const frontHeadingRef = useRef<HTMLHeadingElement>(null);
+  const backHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (focusOnMount) {
+      frontHeadingRef.current?.focus();
+    }
+  }, [focusOnMount]);
+
+  useEffect(() => {
+    if (isFlipped) {
+      backHeadingRef.current?.focus();
+    }
+  }, [isFlipped]);
+
+  function handleSelect(answer: number) {
+    if (!isFlipped) {
+      setSelectedAnswer(answer);
+    }
+  }
+
+  function handleFlip() {
+    if (selectedAnswer !== null) {
+      setIsFlipped(true);
+    }
+  }
+
+  function handleReport(selfReportedCorrect: boolean) {
+    if (selectedAnswer !== null) {
+      onResult({ selectedAnswer, selfReportedCorrect });
+    }
+  }
+
+  return (
+    <div className={styles.scene}>
+      <div className={styles.card} data-flipped={isFlipped}>
+        <section
+          className={`${styles.face} ${styles.front}`}
+          aria-label="Question"
+          aria-hidden={isFlipped}
+          inert={isFlipped}
+        >
+          <CardFront
+            question={question}
+            questionNumber={questionNumber}
+            totalQuestions={totalQuestions}
+            selectedAnswer={selectedAnswer}
+            isLocked={isFlipped}
+            onSelect={handleSelect}
+            onFlip={handleFlip}
+            headingRef={frontHeadingRef}
+          />
+        </section>
+        <section
+          className={`${styles.face} ${styles.back}`}
+          aria-label="Answer"
+          aria-hidden={!isFlipped}
+          inert={!isFlipped}
+        >
+          {isFlipped ? (
+            <CardBack
+              question={question}
+              selectedAnswer={selectedAnswer}
+              onReport={handleReport}
+              headingRef={backHeadingRef}
+            />
+          ) : null}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+export default QuestionCard;
