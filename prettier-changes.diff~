@@ -1,0 +1,51 @@
+commit 23137e87ed329a8846ddc9b168552ea257454225
+Author: Claude <noreply@anthropic.com>
+Date:   Tue Oct 20 17:17:27 2026 -0400
+
+    style: apply Prettier formatting
+
+diff --git a/index.html b/index.html
+index 94eca29..c053d65 100644
+--- a/index.html
++++ b/index.html
+@@ -4,7 +4,10 @@
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <meta name="description" content="Practice addition, subtraction, multiplication, and division with flashcards." />
++    <meta
++      name="description"
++      content="Practice addition, subtraction, multiplication, and division with flashcards."
++    />
+     <title>Math Practice</title>
+   </head>
+   <body>
+diff --git a/src/index.css b/src/index.css
+index 3448d7c..d1aae58 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -19,7 +19,8 @@
+   --color-disabled-edge: #b8c2d6;
+ 
+   /* Type — large base size for young readers */
+-  --font-body: 'Lexend Variable', 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
++  --font-body:
++    'Lexend Variable', 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+   --text-sm: 1rem;
+   --text-base: 1.125rem;
+   --text-lg: 1.375rem;
+diff --git a/src/services/problemValidation.ts b/src/services/problemValidation.ts
+index 5ad1c5b..3d741a6 100644
+--- a/src/services/problemValidation.ts
++++ b/src/services/problemValidation.ts
+@@ -87,9 +87,7 @@ export function matchesDifficulty({
+     }
+     case 'division': {
+       const { divisor, quotient } = rules.division;
+-      return (
+-        isInRange(secondOperand, divisor) && isInRange(firstOperand / secondOperand, quotient)
+-      );
++      return isInRange(secondOperand, divisor) && isInRange(firstOperand / secondOperand, quotient);
+     }
+     default:
+       return false;

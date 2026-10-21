@@ -87,7 +87,9 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
       </dl>
 
       <div className={styles.notes}>
-        <p>{formatOperationList(operations)}, {formatDifficulty(difficulty)} level</p>
+        <p>
+          {formatOperationList(operations)}, {formatDifficulty(difficulty)} level
+        </p>
         <p>Mistake-review questions completed: {reviewQuestionCount}</p>
         {endedEarly ? <p>{`You ended after ${attempted} of ${total} questions.`}</p> : null}
         {reviewTip ? <p>{reviewTip}</p> : null}
