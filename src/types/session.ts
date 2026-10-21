@@ -3,6 +3,9 @@
  */
 import type { DifficultyLevel, MathOperation, QuestionSource } from './question';
 
+/** Regular practice, or review of questions similar to past mistakes. */
+export type PracticeMode = 'regular' | 'mistake-review';
+
 /** Number of questions in a session, or open-ended continuous practice. */
 export type SessionLength = number | 'continuous';
 
@@ -22,6 +25,8 @@ export interface PracticeAttempt {
   /** ISO 8601 timestamp. */
   attemptedAt: string;
   sessionId: string;
+  /** For mistake-review questions: the mistake pattern the question came from. */
+  mistakePatternId?: string;
 }
 
 /** A single practice session and its running totals. */
@@ -34,6 +39,8 @@ export interface PracticeSession {
   operations: MathOperation[];
   difficulty: DifficultyLevel;
   sessionLength: SessionLength;
+  /** Absent in sessions saved before review mode existed, which were regular. */
+  mode?: PracticeMode;
   attempted: number;
   correct: number;
   incorrect: number;
@@ -45,4 +52,6 @@ export interface PracticeConfig {
   operations: MathOperation[];
   difficulty: DifficultyLevel;
   sessionLength: SessionLength;
+  /** Defaults to regular practice when absent. */
+  mode?: PracticeMode;
 }

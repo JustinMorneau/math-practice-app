@@ -62,15 +62,38 @@ describe('createSessionState', () => {
       operations: ['multiplication'],
       difficulty: 2,
       sessionLength: 2,
+      mode: 'regular',
       attempted: 0,
       correct: 0,
       incorrect: 0,
     });
     expect(state.session.completedAt).toBeUndefined();
   });
+
+  it('records review mode on the session', () => {
+    expect(startSession({ mode: 'mistake-review' }).session.mode).toBe('mistake-review');
+  });
 });
 
 describe('createAttempt', () => {
+  it('links a review attempt to its mistake pattern', () => {
+    const question: Question = {
+      ...makeQuestion(),
+      source: 'mistake-review',
+      mistakePatternId: 'm-9',
+    };
+    const attempt = createAttempt({
+      id: 'a-1',
+      question,
+      sessionId: 's-1',
+      selectedAnswer: 56,
+      selfReportedCorrect: true,
+      attemptedAt: '2026-10-20T10:01:00.000Z',
+    });
+
+    expect(attempt).toMatchObject({ source: 'mistake-review', mistakePatternId: 'm-9' });
+  });
+
   it('records the question, the answer, and the self-reported result', () => {
     const question = makeQuestion();
     const attempt = createAttempt({
@@ -147,6 +170,25 @@ describe('practiceSessionReducer: recording attempts', () => {
     expect(finished.session).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 });
     expect(finished.session.completedAt).toBe('2026-10-20T10:05:00.000Z');
     expect(finished.currentQuestion).toBe(lastQuestion);
+  });
+
+  it('ends the session when there is no next question', () => {
+    const start = startSession({ sessionLength: 10 });
+    const state = practiceSessionReducer(start, {
+      type: 'record-attempt',
+      attempt: createAttempt({
+        id: 'a-1',
+        question: start.currentQuestion,
+        sessionId: start.session.id,
+        selectedAnswer: 56,
+        selfReportedCorrect: true,
+        attemptedAt: '2026-10-20T10:05:00.000Z',
+      }),
+      nextQuestion: null,
+    });
+
+    expect(state.status).toBe('completed');
+    expect(state.session).toMatchObject({ attempted: 1, completedAt: '2026-10-20T10:05:00.000Z' });
   });
 
   it('ignores attempts after the session has completed', () => {

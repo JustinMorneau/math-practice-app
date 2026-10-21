@@ -3,7 +3,7 @@ import { MemoryStorage } from '../test/storage';
 import type { PracticeAttempt } from '../types';
 import { recordAttempt } from './attemptRecorder';
 import { loadAttempts, saveAttempt } from './historyStorage';
-import { loadMistakePatterns } from './mistakeStorage';
+import { loadMistakePatterns, saveMistakePatterns } from './mistakeStorage';
 import { loadStatistics } from './statisticsStorage';
 import { STORAGE_KEYS, createStorageService } from './storageService';
 
@@ -147,5 +147,97 @@ describe('recordAttempt: mistake patterns', () => {
     recordAttempt(attempt, storage);
 
     expect(loadMistakePatterns(storage).patterns[0].incorrectCount).toBe(1);
+  });
+});
+
+describe('recordAttempt: mistake review', () => {
+  const original = {
+    id: 'm-original',
+    operation: 'multiplication' as const,
+    firstOperand: 8,
+    secondOperand: 7,
+    correctAnswer: 56,
+    difficulty: 2 as const,
+    incorrectCount: 1,
+    similarCorrectCount: 0,
+    lastIncorrectAt: '2026-10-21T10:00:00.000Z',
+    mastered: false,
+  };
+
+  /** A review answer for 56 ÷ 8, a fact-family question from 8 × 7. */
+  function reviewAttempt(id: string, correct: boolean): PracticeAttempt {
+    return makeAttempt(id, {
+      operation: 'division',
+      firstOperand: 56,
+      secondOperand: 8,
+      correctAnswer: 7,
+      selectedAnswer: correct ? 7 : 6,
+      selfReportedCorrect: correct,
+      difficulty: 2,
+      source: 'mistake-review',
+      mistakePatternId: 'm-original',
+    });
+  }
+
+  function storageWithOriginal() {
+    const storage = createStorageService(new MemoryStorage());
+    saveMistakePatterns([original], storage);
+    return storage;
+  }
+
+  function findOriginal(storage: ReturnType<typeof storageWithOriginal>) {
+    return loadMistakePatterns(storage).patterns.find(({ id }) => id === 'm-original');
+  }
+
+  it('counts a correct review answer toward the original mistake', () => {
+    const storage = storageWithOriginal();
+
+    recordAttempt(reviewAttempt('a-1', true), storage);
+
+    expect(findOriginal(storage)).toMatchObject({ similarCorrectCount: 1, mastered: false });
+  });
+
+  it('masters the original mistake after three correct review answers', () => {
+    const storage = storageWithOriginal();
+
+    for (const id of ['a-1', 'a-2', 'a-3']) {
+      recordAttempt(reviewAttempt(id, true), storage);
+    }
+
+    expect(findOriginal(storage)).toMatchObject({ similarCorrectCount: 3, mastered: true });
+  });
+
+  it('uses the mastery threshold from settings', () => {
+    const storage = storageWithOriginal();
+
+    recordAttempt(reviewAttempt('a-1', true), storage, { masteryThreshold: 2 });
+    recordAttempt(reviewAttempt('a-2', true), storage, { masteryThreshold: 2 });
+
+    expect(findOriginal(storage)?.mastered).toBe(true);
+  });
+
+  it('handles an incorrect review answer: a step back, plus a mistake for the new fact', () => {
+    const storage = storageWithOriginal();
+    recordAttempt(reviewAttempt('a-1', true), storage);
+
+    recordAttempt(reviewAttempt('a-2', false), storage);
+
+    const { patterns } = loadMistakePatterns(storage);
+    expect(findOriginal(storage)?.similarCorrectCount).toBe(0);
+    expect(patterns).toHaveLength(2);
+    expect(patterns[1]).toMatchObject({
+      operation: 'division',
+      firstOperand: 56,
+      secondOperand: 8,
+    });
+  });
+
+  it('counts a review answer only once', () => {
+    const storage = storageWithOriginal();
+
+    recordAttempt(reviewAttempt('a-1', true), storage);
+    recordAttempt(reviewAttempt('a-1', true), storage);
+
+    expect(findOriginal(storage)?.similarCorrectCount).toBe(1);
   });
 });

@@ -6,6 +6,7 @@ import {
   limitMistakePatterns,
   parseMistakePatterns,
   recordIncorrectAnswer,
+  recordReviewAnswer,
 } from './mistakePatterns';
 
 const missedEightTimesSeven = {
@@ -100,6 +101,68 @@ describe('recordIncorrectAnswer', () => {
 
     expect(patterns[0]).toBe(other);
     expect(patterns).toHaveLength(2);
+  });
+});
+
+describe('recordReviewAnswer', () => {
+  it('counts a correct review answer toward mastery', () => {
+    const [pattern] = recordReviewAnswer([makePattern('m-1')], 'm-1', true, 3);
+
+    expect(pattern).toMatchObject({ similarCorrectCount: 1, mastered: false });
+  });
+
+  it('marks a pattern mastered after three correct similar questions', () => {
+    let patterns = [makePattern('m-1')];
+    for (let i = 0; i < 3; i += 1) {
+      patterns = recordReviewAnswer(patterns, 'm-1', true, 3);
+    }
+
+    expect(patterns[0]).toMatchObject({ similarCorrectCount: 3, mastered: true });
+  });
+
+  it('uses the configured mastery threshold', () => {
+    let patterns = [makePattern('m-1')];
+    patterns = recordReviewAnswer(patterns, 'm-1', true, 2);
+    expect(patterns[0].mastered).toBe(false);
+
+    patterns = recordReviewAnswer(patterns, 'm-1', true, 2);
+    expect(patterns[0].mastered).toBe(true);
+  });
+
+  it('takes one step back after an incorrect review answer, never below zero', () => {
+    const [stepBack] = recordReviewAnswer(
+      [makePattern('m-1', { similarCorrectCount: 2 })],
+      'm-1',
+      false,
+      3,
+    );
+    const [atZero] = recordReviewAnswer([makePattern('m-1')], 'm-1', false, 3);
+
+    expect(stepBack.similarCorrectCount).toBe(1);
+    expect(atZero.similarCorrectCount).toBe(0);
+  });
+
+  it('leaves other patterns unchanged', () => {
+    const other = makePattern('m-2');
+
+    expect(recordReviewAnswer([makePattern('m-1'), other], 'm-1', true, 3)[1]).toBe(other);
+  });
+
+  it('lets a mastered pattern return after a future mistake', () => {
+    let patterns = [makePattern('m-1')];
+    for (let i = 0; i < 3; i += 1) {
+      patterns = recordReviewAnswer(patterns, 'm-1', true, 3);
+    }
+    expect(patterns[0].mastered).toBe(true);
+
+    patterns = recordIncorrectAnswer(patterns, missedEightTimesSeven, 'm-new');
+
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0]).toMatchObject({
+      mastered: false,
+      similarCorrectCount: 0,
+      incorrectCount: 2,
+    });
   });
 });
 

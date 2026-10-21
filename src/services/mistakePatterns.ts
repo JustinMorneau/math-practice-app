@@ -74,6 +74,33 @@ export function recordIncorrectAnswer(
 }
 
 /**
+ * Records the result of a review question for the pattern it came from
+ * (specification section 6.4). A correct answer is one step toward mastery,
+ * and reaching `masteryThreshold` marks the pattern mastered. An incorrect
+ * answer takes one step back, without going below zero.
+ */
+export function recordReviewAnswer(
+  patterns: readonly MistakePattern[],
+  patternId: string,
+  correct: boolean,
+  masteryThreshold: number,
+): MistakePattern[] {
+  return patterns.map((pattern) => {
+    if (pattern.id !== patternId) {
+      return pattern;
+    }
+    const similarCorrectCount = correct
+      ? pattern.similarCorrectCount + 1
+      : Math.max(0, pattern.similarCorrectCount - 1);
+    return {
+      ...pattern,
+      similarCorrectCount,
+      mastered: similarCorrectCount >= masteryThreshold,
+    };
+  });
+}
+
+/**
  * At most `max` patterns, removing mastered patterns before active ones and
  * older mistakes before newer ones.
  */

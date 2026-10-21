@@ -9,6 +9,7 @@ import {
   type MathOperation,
   type PracticeAttempt,
   type PracticeConfig,
+  type PracticeMode,
   type PracticeSession,
   type SessionLength,
 } from '../types';
@@ -36,16 +37,23 @@ export function isOperationList(value: unknown): value is MathOperation[] {
   );
 }
 
+export function isPracticeMode(value: unknown): value is PracticeMode {
+  return value === 'regular' || value === 'mistake-review';
+}
+
 /** A complete setup with at least one operation and no duplicates. */
 export function isPracticeConfig(value: unknown): value is PracticeConfig {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
 
-  const { operations, difficulty, sessionLength } = value as Record<string, unknown>;
+  const { operations, difficulty, sessionLength, mode } = value as Record<string, unknown>;
 
   return (
-    isOperationList(operations) && isDifficultyLevel(difficulty) && isSessionLength(sessionLength)
+    isOperationList(operations) &&
+    isDifficultyLevel(difficulty) &&
+    isSessionLength(sessionLength) &&
+    (mode === undefined || isPracticeMode(mode))
   );
 }
 
@@ -96,6 +104,7 @@ export function isPracticeAttempt(value: unknown): value is PracticeAttempt {
     Number.isInteger(attempt.correctAnswer) &&
     Number.isInteger(attempt.selectedAnswer) &&
     typeof attempt.selfReportedCorrect === 'boolean' &&
-    (attempt.source === 'regular' || attempt.source === 'mistake-review')
+    (attempt.source === 'regular' || attempt.source === 'mistake-review') &&
+    (attempt.mistakePatternId === undefined || typeof attempt.mistakePatternId === 'string')
   );
 }

@@ -3,23 +3,39 @@
  * the aggregate statistics, and (for incorrect answers) the mistake
  * patterns used for review.
  */
+import { DEFAULT_MASTERY_THRESHOLD } from '../constants/defaultSettings';
 import type { PracticeAttempt } from '../types';
 import { createId } from '../utils/ids';
 import { loadAttempts, saveAttempt } from './historyStorage';
-import { limitMistakePatterns, recordIncorrectAnswer } from './mistakePatterns';
+import {
+  limitMistakePatterns,
+  recordIncorrectAnswer,
+  recordReviewAnswer,
+} from './mistakePatterns';
 import { loadMistakePatterns, saveMistakePatterns } from './mistakeStorage';
 import { addAttemptToStatistics } from './statisticsService';
 import { loadStatistics, saveStatistics } from './statisticsStorage';
 import { appStorage, type StorageService, type WriteResult } from './storageService';
 
+export interface RecordAttemptOptions {
+  /** Correct review answers needed to master a mistake (from settings). */
+  masteryThreshold?: number;
+}
+
 /**
- * Saves an attempt, adds it to the statistics, and records a mistake
- * pattern when the student reported it as incorrect. Recording the same
- * attempt again does nothing, so nothing is ever counted twice.
+ * Saves an attempt, adds it to the statistics, and updates mistake
+ * patterns:
+ * - an incorrect answer creates or updates the pattern for that fact
+ * - a mistake-review answer moves its original pattern toward mastery when
+ *   correct, or one step back when incorrect
+ *
+ * Recording the same attempt again does nothing, so nothing is ever
+ * counted twice.
  */
 export function recordAttempt(
   attempt: PracticeAttempt,
   storage: StorageService = appStorage,
+  { masteryThreshold = DEFAULT_MASTERY_THRESHOLD }: RecordAttemptOptions = {},
 ): WriteResult {
   if (loadAttempts(storage).some(({ id }) => id === attempt.id)) {
     return { ok: true };
@@ -34,11 +50,22 @@ export function recordAttempt(
   }
 
   const statisticsSaved = saveStatistics(addAttemptToStatistics(statistics, attempt), storage);
-  if (!statisticsSaved.ok || attempt.selfReportedCorrect) {
+  const affectsMistakes = !attempt.selfReportedCorrect || attempt.mistakePatternId !== undefined;
+  if (!statisticsSaved.ok || !affectsMistakes) {
     return statisticsSaved;
   }
 
-  const { patterns } = loadMistakePatterns(storage);
-  const updated = recordIncorrectAnswer(patterns, attempt, createId('m'));
-  return saveMistakePatterns(limitMistakePatterns(updated), storage);
+  let { patterns } = loadMistakePatterns(storage);
+  if (attempt.mistakePatternId !== undefined) {
+    patterns = recordReviewAnswer(
+      patterns,
+      attempt.mistakePatternId,
+      attempt.selfReportedCorrect,
+      masteryThreshold,
+    );
+  }
+  if (!attempt.selfReportedCorrect) {
+    patterns = recordIncorrectAnswer(patterns, attempt, createId('m'));
+  }
+  return saveMistakePatterns(limitMistakePatterns(patterns), storage);
 }

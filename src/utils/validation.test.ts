@@ -55,6 +55,12 @@ describe('isPracticeConfig', () => {
     expect(isPracticeConfig({ ...validConfig, sessionLength: 'continuous' })).toBe(true);
   });
 
+  it('accepts both practice modes, and setups saved before modes existed', () => {
+    expect(isPracticeConfig({ ...validConfig, mode: 'regular' })).toBe(true);
+    expect(isPracticeConfig({ ...validConfig, mode: 'mistake-review' })).toBe(true);
+    expect(isPracticeConfig(validConfig)).toBe(true);
+  });
+
   it.each([
     ['null', null],
     ['a string', 'addition'],
@@ -65,6 +71,7 @@ describe('isPracticeConfig', () => {
     ['an invalid difficulty', { ...validConfig, difficulty: 7 }],
     ['an invalid session length', { ...validConfig, sessionLength: 0 }],
     ['a missing field', { operations: ['addition'], difficulty: 1 }],
+    ['an unknown mode', { ...validConfig, mode: 'speed-round' }],
   ])('rejects %s', (_description, value) => {
     expect(isPracticeConfig(value)).toBe(false);
   });
@@ -139,6 +146,9 @@ describe('isPracticeAttempt', () => {
   it('accepts a complete attempt', () => {
     expect(isPracticeAttempt(attempt)).toBe(true);
     expect(isPracticeAttempt({ ...attempt, source: 'mistake-review' })).toBe(true);
+    expect(
+      isPracticeAttempt({ ...attempt, source: 'mistake-review', mistakePatternId: 'm-1' }),
+    ).toBe(true);
   });
 
   it.each([
@@ -149,6 +159,7 @@ describe('isPracticeAttempt', () => {
     ['a fractional answer', { ...attempt, selectedAnswer: 8.5 }],
     ['a non-boolean result', { ...attempt, selfReportedCorrect: 'yes' }],
     ['an unknown source', { ...attempt, source: 'quiz' }],
+    ['a non-string mistake pattern id', { ...attempt, mistakePatternId: 7 }],
   ])('rejects %s', (_description, value) => {
     expect(isPracticeAttempt(value)).toBe(false);
   });

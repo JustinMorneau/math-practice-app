@@ -28,8 +28,12 @@ export interface PracticeSessionState {
 }
 
 export type PracticeSessionAction =
-  /** `nextQuestion` is ignored when this attempt completes the session. */
-  | { type: 'record-attempt'; attempt: PracticeAttempt; nextQuestion: Question }
+  /**
+   * `nextQuestion` is ignored when this attempt completes the session. A
+   * null `nextQuestion` ends the session, as when a review session has no
+   * mistakes left to review.
+   */
+  | { type: 'record-attempt'; attempt: PracticeAttempt; nextQuestion: Question | null }
   | { type: 'end-session'; completedAt: string };
 
 interface NewSessionDetails {
@@ -51,6 +55,7 @@ export function createSessionState(
       operations: [...config.operations],
       difficulty: config.difficulty,
       sessionLength: config.sessionLength,
+      mode: config.mode ?? 'regular',
       attempted: 0,
       correct: 0,
       incorrect: 0,
@@ -104,6 +109,9 @@ export function createAttempt({
     source: question.source,
     attemptedAt,
     sessionId,
+    ...(question.mistakePatternId === undefined
+      ? {}
+      : { mistakePatternId: question.mistakePatternId }),
   };
 }
 
@@ -138,7 +146,7 @@ export function practiceSessionReducer(
       };
       const attempts = [...state.attempts, attempt];
 
-      if (hasReachedSessionLength(session)) {
+      if (hasReachedSessionLength(session) || nextQuestion === null) {
         return {
           ...state,
           session: { ...session, completedAt: attempt.attemptedAt },
