@@ -7,3 +7,9 @@
 .title {
   margin: 0;
 }
+
+@media (max-height: 37.5rem) {
+  .page {
+    gap: var(--space-3);
+  }
+}

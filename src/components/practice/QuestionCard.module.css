@@ -118,7 +118,9 @@
   padding-bottom: var(--block-depth);
 }
 
-@media (max-width: 20rem) {
+/* Stack the answers only on the very narrowest screens; a 2 × 2 grid keeps
+   every answer within reach without scrolling. */
+@media (max-width: 18rem) {
   .choices {
     grid-template-columns: 1fr;
   }
@@ -174,5 +176,47 @@
 @media (max-width: 28rem) {
   .resultButtons {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Short screens ----------
+   Small phones and phones in landscape: tighten spacing so the answers and
+   the Flip Card button fit without scrolling. */
+@media (max-height: 37.5rem) {
+  .face {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .problem {
+    margin: 0;
+    font-size: 2.25rem;
+  }
+
+  .answerProblem {
+    font-size: 2rem;
+  }
+
+  .keyHint {
+    display: none;
+  }
+
+  /* Regular button height (still a 48px touch target) */
+  .wideButton {
+    min-height: 3rem;
+    padding-block: var(--space-2);
+    font-size: var(--text-base);
+  }
+}
+
+/* Wide but short (phones in landscape): all four answers in one row */
+@media (max-height: 30rem) and (min-width: 30rem) {
+  .face {
+    padding-inline: var(--space-6);
+  }
+
+  .choices {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
   }
 }

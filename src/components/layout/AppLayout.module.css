@@ -10,3 +10,10 @@
     padding: var(--space-12) var(--space-8) 4rem;
   }
 }
+
+/* Short screens (small phones, phones in landscape): less space above the content */
+@media (max-height: 37.5rem) {
+  .main {
+    padding-top: var(--space-3);
+  }
+}
