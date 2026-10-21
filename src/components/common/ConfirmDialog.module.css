@@ -1,0 +1,43 @@
+.dialog {
+  width: min(32rem, calc(100% - 2rem));
+  padding: var(--space-6);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 3px solid var(--color-ink);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 0 var(--color-ink);
+}
+
+.dialog::backdrop {
+  background: rgb(31 42 68 / 55%);
+}
+
+.title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-xl);
+}
+
+.message {
+  margin-bottom: var(--space-6);
+}
+
+.message p {
+  margin: 0 0 var(--space-2);
+}
+
+.message p:last-child {
+  margin-bottom: 0;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* Stack the buttons on phones, keeping the safe choice on top */
+@media (max-width: 30rem) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}

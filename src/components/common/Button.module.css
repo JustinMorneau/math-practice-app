@@ -55,6 +55,15 @@
   background: var(--color-sun-soft);
 }
 
+.danger {
+  color: #ffffff;
+  background: var(--color-red-dark);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--color-red-darker);
+}
+
 .large {
   min-height: 4rem;
   padding: var(--space-4) var(--space-8);

@@ -1,12 +1,15 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 import { Link, type LinkProps } from 'react-router';
 import styles from './Button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger';
 export type ButtonSize = 'medium' | 'large';
 
 interface ButtonStyleProps {
-  /** `primary` for the main action on a screen, `secondary` for everything else. */
+  /**
+   * `primary` for the main action on a screen, `danger` for actions that
+   * erase data, and `secondary` for everything else.
+   */
   variant?: ButtonVariant;
   size?: ButtonSize;
 }
@@ -18,7 +21,8 @@ function buttonClassName(
   return [styles.button, styles[variant], styles[size], extraClassName].filter(Boolean).join(' ');
 }
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, ButtonStyleProps {}
+/** All native button props, including `ref`. */
+export interface ButtonProps extends ComponentProps<'button'>, ButtonStyleProps {}
 
 /** A button that performs an action on the current page. Defaults to `type="button"`. */
 export function Button({ variant, size, className, type = 'button', ...rest }: ButtonProps) {
