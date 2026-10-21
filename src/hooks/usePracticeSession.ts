@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { useAppData } from '../app/AppDataContext';
-import { saveAttempt, saveSession } from '../services/historyStorage';
+import { saveSession } from '../services/historyStorage';
 import {
   createAttempt,
   createSessionState,
@@ -9,6 +9,7 @@ import {
   practiceSessionReducer,
 } from '../services/practiceSession';
 import type { PracticeConfig } from '../types';
+import { recordAttempt } from '../services/statisticsStorage';
 import { createId } from '../utils/ids';
 
 export interface ReportedResult {
@@ -21,7 +22,8 @@ export interface ReportedResult {
  * running totals, the recorded attempts, and actions to record a result or
  * end the session early.
  *
- * The session and every attempt are saved as they happen, so progress
+ * The session and every attempt are saved as they happen, and each attempt
+ * is added to the aggregate statistics, so progress
  * survives closing the browser. A session is saved once its first question
  * is answered, so setups that were opened and abandoned are not stored.
  *
@@ -48,7 +50,7 @@ export function usePracticeSession(config: PracticeConfig) {
   useEffect(() => {
     const latestAttempt = state.attempts.at(-1);
     if (latestAttempt) {
-      reportStorageResult(saveAttempt(latestAttempt, storage));
+      reportStorageResult(recordAttempt(latestAttempt, storage));
     }
   }, [state.attempts, storage, reportStorageResult]);
 
