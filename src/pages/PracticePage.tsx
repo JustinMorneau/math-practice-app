@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
+import { useAppData } from '../app/AppDataContext';
 import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../app/routes';
 import { Button } from '../components/common/Button';
 import PageContainer from '../components/layout/PageContainer';
@@ -30,6 +31,7 @@ function PracticePage() {
 
 function PracticeSessionView({ config }: { config: PracticeConfig }) {
   const navigate = useNavigate();
+  const { settings } = useAppData();
   const practice = usePracticeSession(config);
   const { session, attempts, currentQuestion, isActive, questionNumber, totalQuestions } = practice;
   const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
@@ -83,6 +85,9 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
         questionNumber={questionNumber}
         totalQuestions={totalQuestions}
         onResult={practice.recordResult}
+        animated={settings.cardAnimationsEnabled}
+        showExplanation={settings.showExplanations}
+        soundEffects={settings.soundEffectsEnabled}
         focusOnMount={questionNumber > 1}
       />
 

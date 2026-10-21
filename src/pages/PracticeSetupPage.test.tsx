@@ -1,7 +1,11 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { loadSettings, saveSettings } from '../services/settingsStorage';
+import { createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
+import { MemoryStorage } from '../test/storage';
 
 /**
  * The setup page's own status message. Scoped to <main> because the shared
@@ -38,6 +42,38 @@ describe('PracticeSetupPage', () => {
     expect(screen.getByRole('checkbox', { name: 'Addition' })).not.toBeChecked();
     expect(screen.getByRole('radio', { name: 'Advanced' })).toBeChecked();
     expect(screen.getByRole('radio', { name: '5 questions' })).toBeChecked();
+  });
+
+  it('starts from the default settings', () => {
+    const storage = createStorageService(new MemoryStorage());
+    saveSettings(
+      {
+        ...DEFAULT_SETTINGS,
+        defaultOperations: ['subtraction', 'division'],
+        defaultDifficulty: 3,
+        defaultSessionLength: 20,
+      },
+      storage,
+    );
+    renderAppAt('/practice/setup', { storage });
+
+    expect(screen.getByRole('checkbox', { name: 'Subtraction' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Division' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Addition' })).not.toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Intermediate' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: '20 questions' })).toBeChecked();
+  });
+
+  it('lets one session differ from the defaults without changing them', async () => {
+    const user = userEvent.setup();
+    const storage = createStorageService(new MemoryStorage());
+    renderAppAt('/practice/setup', { storage });
+
+    await user.click(screen.getByRole('radio', { name: 'Advanced' }));
+    await user.click(getStartButton());
+
+    expect(screen.getByText('Addition, Advanced level')).toBeInTheDocument();
+    expect(loadSettings(storage).settings.defaultDifficulty).toBe(1);
   });
 
   it('starts with sensible defaults so a session can begin right away', () => {

@@ -2,7 +2,7 @@
  * Display details and defaults for the practice setup options.
  * Labels are written for children ages 7–12.
  */
-import type { DifficultyLevel, MathOperation, PracticeConfig, SessionLength } from '../types';
+import type { DifficultyLevel, MathOperation, SessionLength } from '../types';
 
 export interface OperationDetails {
   label: string;
@@ -41,13 +41,3 @@ export const SESSION_LENGTH_OPTIONS: readonly SessionLengthOption[] = [
   { value: 20, label: '20 questions', description: 'A big challenge' },
   { value: 'continuous', label: 'Keep going', description: 'Stop whenever you like' },
 ];
-
-/**
- * Starting selections for the setup page. Phase 11 will replace these with
- * the defaults saved on the Settings page.
- */
-export const DEFAULT_PRACTICE_CONFIG: PracticeConfig = {
-  operations: ['addition'],
-  difficulty: 1,
-  sessionLength: 10,
-};

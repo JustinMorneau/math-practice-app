@@ -10,16 +10,25 @@ interface SetupFieldsetProps {
   action?: ReactNode;
   /** `wide` for tiles with descriptions, `compact` for short options. */
   layout?: 'wide' | 'compact';
+  /** `small` when the group sits under its own section heading. */
+  legendSize?: 'large' | 'small';
   children: ReactNode;
 }
 
 /** A labeled group of setup choices laid out as a responsive grid of tiles. */
-function SetupFieldset({ legend, hint, action, layout = 'wide', children }: SetupFieldsetProps) {
+function SetupFieldset({
+  legend,
+  hint,
+  action,
+  layout = 'wide',
+  legendSize = 'large',
+  children,
+}: SetupFieldsetProps) {
   const hintId = useId();
 
   return (
     <fieldset className={styles.fieldset} aria-describedby={hint ? hintId : undefined}>
-      <legend className={styles.legend}>{legend}</legend>
+      <legend className={`${styles.legend} ${styles[legendSize]}`}>{legend}</legend>
       {hint || action ? (
         <div className={styles.intro}>
           {hint ? (

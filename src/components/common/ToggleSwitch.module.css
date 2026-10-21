@@ -1,0 +1,82 @@
+.row {
+  /* Keeps the visually hidden input inside this element */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--color-sun-soft);
+}
+
+.row:has(.input:focus-visible) {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.description {
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+}
+
+.switch {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.state {
+  min-width: 2rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: right;
+}
+
+.track {
+  position: relative;
+  width: 3.25rem;
+  height: 1.875rem;
+  background: var(--color-disabled);
+  border: var(--border-chunky);
+  border-radius: 999px;
+  transition: background-color 150ms ease-out;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.375rem;
+  height: 1.375rem;
+  background: var(--color-surface);
+  border: var(--border-chunky);
+  border-radius: 50%;
+  transition: transform 150ms ease-out;
+}
+
+.input:checked + .switch .track {
+  background: var(--color-green);
+}
+
+.input:checked + .switch .knob {
+  transform: translateX(1.375rem);
+}

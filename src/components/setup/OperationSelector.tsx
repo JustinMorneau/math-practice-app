@@ -8,12 +8,21 @@ import SetupFieldset from './SetupFieldset';
 
 interface OperationSelectorProps {
   selected: readonly MathOperation[];
+  legend?: string;
+  hint?: string;
+  legendSize?: 'large' | 'small';
   /** Always called with operations in MATH_OPERATIONS order. */
   onChange: (operations: MathOperation[]) => void;
 }
 
 /** Pick one or more operations. Choosing several mixes them in one session. */
-function OperationSelector({ selected, onChange }: OperationSelectorProps) {
+function OperationSelector({
+  selected,
+  legend = 'Choose your problems',
+  hint = 'Pick one or more. Pick a few to mix them up!',
+  legendSize,
+  onChange,
+}: OperationSelectorProps) {
   const groupName = useId();
   const allSelected = MATH_OPERATIONS.every((operation) => selected.includes(operation));
 
@@ -31,8 +40,9 @@ function OperationSelector({ selected, onChange }: OperationSelectorProps) {
 
   return (
     <SetupFieldset
-      legend="Choose your problems"
-      hint="Pick one or more. Pick a few to mix them up!"
+      legend={legend}
+      hint={hint}
+      legendSize={legendSize}
       action={
         <Button variant="secondary" onClick={handleToggleAll}>
           {allSelected ? 'Clear all' : 'Select all'}

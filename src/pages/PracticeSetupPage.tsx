@@ -1,12 +1,12 @@
 import { useId, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { useAppData } from '../app/AppDataContext';
 import { ROUTES, type PracticeSetupState } from '../app/routes';
 import { Button } from '../components/common/Button';
 import PageContainer from '../components/layout/PageContainer';
 import DifficultySelector from '../components/setup/DifficultySelector';
 import OperationSelector from '../components/setup/OperationSelector';
 import SessionLengthSelector from '../components/setup/SessionLengthSelector';
-import { DEFAULT_PRACTICE_CONFIG } from '../constants/practiceOptions';
 import type { PracticeConfig } from '../types';
 import { isPracticeConfig } from '../utils/validation';
 import styles from './PracticeSetupPage.module.css';
@@ -17,18 +17,26 @@ import styles from './PracticeSetupPage.module.css';
  * as router state.
  *
  * Opens with the previous choices when router state carries a `config` (as
- * when returning from a session summary), and with the defaults otherwise.
+ * when returning from a session summary), and with the student's saved
+ * default settings otherwise. Changes here apply to this session only.
  */
 function PracticeSetupPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { settings } = useAppData();
   const messageId = useId();
   const setupState = location.state as PracticeSetupState | null;
   const showMissingSessionNotice = setupState?.notice === 'session-missing';
   // Start from the previous session's choices when returning from a summary.
   const previousConfig = setupState?.config;
   const [config, setConfig] = useState<PracticeConfig>(() =>
-    isPracticeConfig(previousConfig) ? previousConfig : DEFAULT_PRACTICE_CONFIG,
+    isPracticeConfig(previousConfig)
+      ? previousConfig
+      : {
+          operations: settings.defaultOperations,
+          difficulty: settings.defaultDifficulty,
+          sessionLength: settings.defaultSessionLength,
+        },
   );
 
   // A difficulty and session length are always selected, so only the

@@ -1,0 +1,37 @@
+.intro {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+
+.status {
+  margin: 0;
+  font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.section + .section {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 2px dashed var(--color-grid);
+}
+
+.section h2,
+.section p {
+  margin: 0;
+}
+
+.sectionHint {
+  margin-top: calc(-1 * var(--space-4));
+  color: var(--color-ink-soft);
+}
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

@@ -4,8 +4,9 @@
  * never erases the rest of the student's preferences.
  */
 import { DEFAULT_SETTINGS, MASTERY_THRESHOLD_RANGE } from '../constants/defaultSettings';
+import { SESSION_LENGTH_OPTIONS } from '../constants/practiceOptions';
 import type { AppSettings } from '../types';
-import { isDifficultyLevel, isOperationList, isSessionLength } from '../utils/validation';
+import { isDifficultyLevel, isOperationList } from '../utils/validation';
 import {
   STORAGE_KEYS,
   appStorage,
@@ -18,7 +19,8 @@ const SETTING_VALIDATORS: { [K in keyof AppSettings]: (value: unknown) => boolea
   soundEffectsEnabled: (value) => typeof value === 'boolean',
   cardAnimationsEnabled: (value) => typeof value === 'boolean',
   showExplanations: (value) => typeof value === 'boolean',
-  defaultSessionLength: isSessionLength,
+  // Only lengths the setup page offers, so a default always matches a choice.
+  defaultSessionLength: (value) => SESSION_LENGTH_OPTIONS.some((option) => option.value === value),
   defaultDifficulty: isDifficultyLevel,
   defaultOperations: isOperationList,
   masteryThreshold: (value) =>

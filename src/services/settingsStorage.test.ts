@@ -59,6 +59,13 @@ describe('parseSettings', () => {
     });
   });
 
+  it('only accepts session lengths the setup page offers', () => {
+    expect(parseSettings({ ...customSettings, defaultSessionLength: 7 })).toEqual({
+      ...customSettings,
+      defaultSessionLength: DEFAULT_SETTINGS.defaultSessionLength,
+    });
+  });
+
   it('fills in settings missing from older saved data', () => {
     expect(parseSettings({ showExplanations: false })).toEqual({
       ...DEFAULT_SETTINGS,

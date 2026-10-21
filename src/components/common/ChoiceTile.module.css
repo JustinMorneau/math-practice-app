@@ -1,6 +1,8 @@
 /* Tiles share the counting-block look of buttons: unselected tiles sit up
    on an ink edge, selected tiles are pressed down. */
 .tile {
+  /* Keeps the visually hidden input inside this element */
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);

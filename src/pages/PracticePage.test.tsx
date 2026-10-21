@@ -1,7 +1,11 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { saveSettings } from '../services/settingsStorage';
+import { createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
+import { MemoryStorage } from '../test/storage';
 import type { PracticeConfig } from '../types';
 
 type User = ReturnType<typeof userEvent.setup>;
@@ -132,6 +136,31 @@ describe('PracticePage: continuous practice', () => {
     await user.click(screen.getByRole('button', { name: 'End Session' }));
 
     expect(screen.getByRole('heading', { level: 1, name: 'Practice Setup' })).toBeInTheDocument();
+  });
+});
+
+describe('PracticePage: card settings', () => {
+  it('shows explanations on the card back by default', async () => {
+    const user = renderPracticeWithState(fiveQuestions);
+    const choices = screen.getByRole('group', { name: 'Answer choices' });
+
+    await user.click(within(choices).getAllByRole('button')[0]);
+    await user.click(screen.getByRole('button', { name: 'Flip Card' }));
+
+    expect(screen.getByText(/ because /)).toBeInTheDocument();
+  });
+
+  it('leaves explanations out when the setting is off', async () => {
+    const storage = createStorageService(new MemoryStorage());
+    saveSettings({ ...DEFAULT_SETTINGS, showExplanations: false }, storage);
+    renderAppAt('/practice/session', { state: fiveQuestions, storage });
+    const user = userEvent.setup();
+    const choices = screen.getByRole('group', { name: 'Answer choices' });
+
+    await user.click(within(choices).getAllByRole('button')[0]);
+    await user.click(screen.getByRole('button', { name: 'Flip Card' }));
+
+    expect(screen.queryByText(/ because /)).not.toBeInTheDocument();
   });
 });
 

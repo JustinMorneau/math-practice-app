@@ -6,15 +6,22 @@ import SetupFieldset from './SetupFieldset';
 
 interface DifficultySelectorProps {
   value: DifficultyLevel;
+  legend?: string;
+  legendSize?: 'large' | 'small';
   onChange: (difficulty: DifficultyLevel) => void;
 }
 
 /** Pick exactly one difficulty level. Each option describes its number range. */
-function DifficultySelector({ value, onChange }: DifficultySelectorProps) {
+function DifficultySelector({
+  value,
+  legend = 'Choose your level',
+  legendSize,
+  onChange,
+}: DifficultySelectorProps) {
   const groupName = useId();
 
   return (
-    <SetupFieldset legend="Choose your level">
+    <SetupFieldset legend={legend} legendSize={legendSize}>
       {DIFFICULTY_LEVELS.map((level) => {
         const { name, description } = DIFFICULTY_DETAILS[level];
         return (
