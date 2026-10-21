@@ -45,3 +45,18 @@ export function calculateAnswer(operation: MathOperation, first: number, second:
     }
   }
 }
+
+/**
+ * Accuracy as a whole-number percentage (specification section 10.4), or 0
+ * when nothing was attempted. Rounding never reaches 100% unless every answer
+ * was correct, and never drops to 0% when at least one was.
+ */
+export function calculateAccuracy(correct: number, attempted: number): number {
+  if (attempted <= 0 || correct <= 0) {
+    return 0;
+  }
+  if (correct >= attempted) {
+    return 100;
+  }
+  return Math.min(99, Math.max(1, Math.round((correct / attempted) * 100)));
+}
