@@ -3,8 +3,8 @@ import { OPERATION_DETAILS } from '../../constants/practiceOptions';
 import { MATH_OPERATIONS, type MathOperation } from '../../types';
 import { Button } from '../common/Button';
 import ChoiceTile from '../common/ChoiceTile';
+import OperationSymbol from '../common/OperationSymbol';
 import SetupFieldset from './SetupFieldset';
-import styles from './OperationSelector.module.css';
 
 interface OperationSelectorProps {
   selected: readonly MathOperation[];
@@ -40,7 +40,7 @@ function OperationSelector({ selected, onChange }: OperationSelectorProps) {
       }
     >
       {MATH_OPERATIONS.map((operation) => {
-        const { label, symbol } = OPERATION_DETAILS[operation];
+        const { label } = OPERATION_DETAILS[operation];
         return (
           <ChoiceTile
             key={operation}
@@ -50,7 +50,7 @@ function OperationSelector({ selected, onChange }: OperationSelectorProps) {
             checked={selected.includes(operation)}
             onChange={(checked) => handleToggle(operation, checked)}
             label={label}
-            icon={<span className={`${styles.symbol} ${styles[operation]}`}>{symbol}</span>}
+            icon={<OperationSymbol operation={operation} />}
           />
         );
       })}

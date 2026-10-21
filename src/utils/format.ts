@@ -31,3 +31,14 @@ export function formatProblemText(
 ): string {
   return `${firstOperand} ${OPERATION_DETAILS[operation].symbol} ${secondOperand}`;
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
+/** A readable date and time in the student's locale, e.g. "Oct 21, 2026, 3:05 PM". */
+export function formatDateTime(isoTimestamp: string): string {
+  const date = new Date(isoTimestamp);
+  return Number.isNaN(date.getTime()) ? isoTimestamp : dateTimeFormatter.format(date);
+}

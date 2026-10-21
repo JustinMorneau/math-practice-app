@@ -1,0 +1,34 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section h2,
+.section p {
+  margin: 0;
+}
+
+/* Space between sections, on top of the page's normal spacing */
+.section + .section {
+  margin-top: var(--space-4);
+}
+
+/* Four cards per section: one column on phones, 2 × 2 on wider screens */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding-bottom: var(--block-depth);
+}
+
+@media (min-width: 36rem) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.status {
+  margin: 0;
+  font-weight: 600;
+}

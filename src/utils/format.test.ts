@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatDateTime,
   formatDifficulty,
   formatOperationList,
   formatProblemText,
@@ -66,5 +67,15 @@ describe('formatProblemText', () => {
     ['division', 56, 7, '56 ÷ 7'],
   ] as const)('formats %s as "%s"', (operation, first, second, expected) => {
     expect(formatProblemText(operation, first, second)).toBe(expected);
+  });
+});
+
+describe('formatDateTime', () => {
+  it('formats a timestamp as a readable date', () => {
+    expect(formatDateTime('2026-10-21T15:05:00.000Z')).toMatch(/2026/);
+  });
+
+  it('returns the original text when it is not a valid date', () => {
+    expect(formatDateTime('not a date')).toBe('not a date');
   });
 });

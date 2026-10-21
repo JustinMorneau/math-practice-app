@@ -3,6 +3,7 @@ import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../ap
 import { Button, ButtonLink } from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
 import PageContainer from '../components/layout/PageContainer';
+import StatGrid from '../components/statistics/StatGrid';
 import { getEncouragement } from '../services/encouragement';
 import { getTotalQuestions } from '../services/practiceSession';
 import type { PracticeConfig } from '../types';
@@ -67,24 +68,14 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
         <p className={styles.message}>{message}</p>
       </section>
 
-      <dl className={styles.stats}>
-        <div className={`${styles.stat} ${styles.accuracy}`}>
-          <dt>Accuracy</dt>
-          <dd>{accuracy}%</dd>
-        </div>
-        <div className={styles.stat}>
-          <dt>Answered</dt>
-          <dd>{attempted}</dd>
-        </div>
-        <div className={styles.stat}>
-          <dt>Got right</dt>
-          <dd>{correct}</dd>
-        </div>
-        <div className={styles.stat}>
-          <dt>To practice</dt>
-          <dd>{incorrect}</dd>
-        </div>
-      </dl>
+      <StatGrid
+        items={[
+          { label: 'Accuracy', value: `${accuracy}%`, highlight: true },
+          { label: 'Answered', value: attempted },
+          { label: 'Got right', value: correct },
+          { label: 'To practice', value: incorrect },
+        ]}
+      />
 
       <div className={styles.notes}>
         <p>
