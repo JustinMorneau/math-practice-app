@@ -8,8 +8,20 @@ import { formatProblemText } from '../utils/format';
 import { calculateAnswer } from '../utils/math';
 import { isDifficultyLevel, isMathOperation } from '../utils/validation';
 
+export interface ProblemCheckOptions {
+  /**
+   * Whether the numbers must fall within the level's usual ranges (default
+   * true). Mistake-review questions built from a missed fact's own numbers,
+   * such as 56 ÷ 8 from 8 × 7, may fall slightly outside them.
+   */
+  enforceDifficultyRanges?: boolean;
+}
+
 /** Every rule the problem breaks, or an empty list when it is valid. */
-export function getProblemErrors(problem: MathProblem): string[] {
+export function getProblemErrors(
+  problem: MathProblem,
+  { enforceDifficultyRanges = true }: ProblemCheckOptions = {},
+): string[] {
   const { operation, firstOperand, secondOperand, correctAnswer, difficulty, displayText } =
     problem;
 
@@ -41,7 +53,7 @@ export function getProblemErrors(problem: MathProblem): string[] {
   if (displayText !== formatProblemText(operation, firstOperand, secondOperand)) {
     errors.push('The display text does not match the operands.');
   }
-  if (!matchesDifficulty(problem)) {
+  if (enforceDifficultyRanges && !matchesDifficulty(problem)) {
     errors.push(`The numbers do not match difficulty level ${difficulty}.`);
   }
 

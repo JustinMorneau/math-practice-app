@@ -3,7 +3,7 @@
  * rules in specification sections 8.2 and 18.
  */
 import type { Question } from '../types';
-import { getProblemErrors } from './problemValidation';
+import { getProblemErrors, type ProblemCheckOptions } from './problemValidation';
 
 /** Every question offers this many choices: one correct answer and three distractors. */
 export const CHOICE_COUNT = 4;
@@ -31,8 +31,8 @@ export function getChoiceErrors({ choices, correctAnswer }: Question): string[] 
 }
 
 /** Every rule the question breaks: problem rules first, then answer-choice rules. */
-export function getQuestionErrors(question: Question): string[] {
-  return [...getProblemErrors(question), ...getChoiceErrors(question)];
+export function getQuestionErrors(question: Question, options?: ProblemCheckOptions): string[] {
+  return [...getProblemErrors(question, options), ...getChoiceErrors(question)];
 }
 
 export function isValidQuestion(question: Question): boolean {

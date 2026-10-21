@@ -75,6 +75,17 @@ describe('getProblemErrors', () => {
     );
   });
 
+  it('can skip the difficulty ranges while checking everything else', () => {
+    const relaxed = { enforceDifficultyRanges: false };
+    const outsideLevelOne: MathProblem = { ...validProblem, difficulty: 1 };
+    const wrongAnswer: MathProblem = { ...outsideLevelOne, correctAnswer: 50 };
+
+    expect(getProblemErrors(outsideLevelOne, relaxed)).toEqual([]);
+    expect(getProblemErrors(wrongAnswer, relaxed)).toEqual([
+      'The correct answer should be 56, not 50.',
+    ]);
+  });
+
   it('rejects numbers outside the difficulty level', () => {
     expect(getProblemErrors({ ...validProblem, difficulty: 1 })).toContain(
       'The numbers do not match difficulty level 1.',
