@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
 import { ensureSchemaVersion } from '../services/schemaMigrations';
 import { loadSettings, saveSettings } from '../services/settingsStorage';
 import {
@@ -58,6 +59,16 @@ function AppProvider({ children, storage = appStorage }: AppProviderProps) {
     setStorageWarning(null);
   }, [storageWarning]);
 
+  const clearAllData = useCallback(() => {
+    const result = storage.clearAppData();
+    // Start over as on a first launch: a version record and default settings.
+    ensureSchemaVersion(storage);
+    setSettings(DEFAULT_SETTINGS);
+    setDismissedWarnings(new Set());
+    reportStorageResult(result);
+    return result;
+  }, [storage, reportStorageResult]);
+
   const value = useMemo<AppDataContextValue>(
     () => ({
       storage,
@@ -66,8 +77,17 @@ function AppProvider({ children, storage = appStorage }: AppProviderProps) {
       storageWarning,
       reportStorageResult,
       dismissStorageWarning,
+      clearAllData,
     }),
-    [storage, settings, updateSettings, storageWarning, reportStorageResult, dismissStorageWarning],
+    [
+      storage,
+      settings,
+      updateSettings,
+      storageWarning,
+      reportStorageResult,
+      dismissStorageWarning,
+      clearAllData,
+    ],
   );
 
   return <AppDataContext value={value}>{children}</AppDataContext>;

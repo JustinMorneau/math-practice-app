@@ -2,14 +2,17 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { loadAttempts } from '../services/historyStorage';
 import { loadSettings, saveSettings } from '../services/settingsStorage';
-import { createStorageService } from '../services/storageService';
+import { recordAttempt } from '../services/statisticsStorage';
+import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
 import { MemoryStorage } from '../test/storage';
 
 function setup() {
-  const storage = createStorageService(new MemoryStorage());
-  return { storage, user: userEvent.setup() };
+  const browserStorage = new MemoryStorage();
+  const storage = createStorageService(browserStorage);
+  return { browserStorage, storage, user: userEvent.setup() };
 }
 
 function getGroup(name: string) {
@@ -75,5 +78,78 @@ describe('SettingsPage', () => {
       /pick at least one kind of problem/i,
     );
     expect(loadSettings(storage).settings.defaultOperations).toEqual(['addition']);
+  });
+});
+
+describe('Clearing all application data', () => {
+  it('shows a strong warning before erasing anything', async () => {
+    const { storage, user } = setup();
+    renderAppAt('/settings', { storage });
+
+    await user.click(screen.getByRole('button', { name: 'Clear All Application Data' }));
+
+    const dialog = within(screen.getByRole('dialog', { name: 'Clear all application data?' }));
+    expect(dialog.getByText(/permanently erases/)).toBeInTheDocument();
+    expect(dialog.getByText("This can't be undone.")).toBeInTheDocument();
+    expect(dialog.getByRole('button', { name: 'Keep My Data' })).toHaveFocus();
+  });
+
+  it('keeps everything when cancelled', async () => {
+    const { storage, user } = setup();
+    saveSettings({ ...DEFAULT_SETTINGS, masteryThreshold: 5 }, storage);
+    renderAppAt('/settings', { storage });
+
+    await user.click(screen.getByRole('button', { name: 'Clear All Application Data' }));
+    await user.click(screen.getByRole('button', { name: 'Keep My Data' }));
+
+    expect(loadSettings(storage).settings.masteryThreshold).toBe(5);
+    expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
+  });
+
+  it('erases everything, restores defaults, and returns home', async () => {
+    const { browserStorage, storage, user } = setup();
+    saveSettings({ ...DEFAULT_SETTINGS, masteryThreshold: 5, defaultDifficulty: 4 }, storage);
+    recordAttempt(
+      {
+        id: 'a-1',
+        questionId: 'q-1',
+        operation: 'addition',
+        firstOperand: 2,
+        secondOperand: 3,
+        correctAnswer: 5,
+        selectedAnswer: 5,
+        selfReportedCorrect: true,
+        difficulty: 1,
+        source: 'regular',
+        attemptedAt: '2026-10-22T10:00:00.000Z',
+        sessionId: 's-1',
+      },
+      storage,
+    );
+    browserStorage.setItem(STORAGE_KEYS.mistakePatterns, '[]');
+    browserStorage.setItem('otherApp.data', 'keep me');
+    renderAppAt('/settings', { storage });
+
+    await user.click(screen.getByRole('button', { name: 'Clear All Application Data' }));
+    await user.click(screen.getByRole('button', { name: 'Erase All Data' }));
+
+    expect(screen.getByRole('heading', { level: 1, name: /welcome/i })).toBeInTheDocument();
+    expect(screen.getByText(/all app data was cleared/i)).toBeInTheDocument();
+    expect(loadAttempts(storage)).toEqual([]);
+    for (const key of [
+      STORAGE_KEYS.settings,
+      STORAGE_KEYS.sessions,
+      STORAGE_KEYS.attempts,
+      STORAGE_KEYS.statistics,
+      STORAGE_KEYS.mistakePatterns,
+    ]) {
+      expect(browserStorage.getItem(key)).toBeNull();
+    }
+    expect(browserStorage.getItem(STORAGE_KEYS.version)).toBe('{"version":1}');
+    expect(browserStorage.getItem('otherApp.data')).toBe('keep me');
+
+    // The app is back on its defaults, e.g. on the setup page.
+    await user.click(screen.getByRole('link', { name: 'Start Practice' }));
+    expect(screen.getByRole('radio', { name: 'Beginner' })).toBeChecked();
   });
 });

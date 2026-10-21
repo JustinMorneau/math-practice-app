@@ -29,6 +29,11 @@
   margin-bottom: 0;
 }
 
+.message ul {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-6);
+}
+
 .actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

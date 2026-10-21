@@ -13,6 +13,8 @@ export interface AppDataContextValue {
   /** Shows a warning when a save failed; successful saves are ignored. */
   reportStorageResult: (result: WriteResult) => void;
   dismissStorageWarning: () => void;
+  /** Erases all saved data and restores the default settings. */
+  clearAllData: () => WriteResult;
 }
 
 export const AppDataContext = createContext<AppDataContextValue | null>(null);

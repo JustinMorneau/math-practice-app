@@ -30,3 +30,9 @@ export interface SessionSummaryState {
   /** How many of the session's questions were mistake-review questions. */
   reviewQuestionCount: number;
 }
+
+/** Router state the home page understands. */
+export interface HomePageState {
+  /** Set after all app data was cleared from the settings page. */
+  notice?: 'data-cleared';
+}

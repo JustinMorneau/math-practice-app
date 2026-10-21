@@ -1,6 +1,10 @@
 import { useId, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useAppData } from '../app/AppDataContext';
+import { ROUTES, type HomePageState } from '../app/routes';
+import { Button } from '../components/common/Button';
 import ChoiceTile from '../components/common/ChoiceTile';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import ToggleSwitch from '../components/common/ToggleSwitch';
 import PageContainer from '../components/layout/PageContainer';
 import DifficultySelector from '../components/setup/DifficultySelector';
@@ -18,9 +22,11 @@ const MASTERY_OPTIONS = [2, 3, 4, 5] as const;
  * saved as soon as it is made.
  */
 function SettingsPage() {
-  const { settings, updateSettings } = useAppData();
+  const navigate = useNavigate();
+  const { settings, updateSettings, clearAllData } = useAppData();
   const masteryGroupName = useId();
   const [statusMessage, setStatusMessage] = useState('');
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   // Shown while no operation is selected; the saved default stays unchanged.
   const [operationsDraft, setOperationsDraft] = useState<MathOperation[]>(
     settings.defaultOperations,
@@ -38,6 +44,12 @@ function SettingsPage() {
     } else {
       setStatusMessage('Pick at least one kind of problem. Your last choice is still saved.');
     }
+  }
+
+  function handleClearAll() {
+    clearAllData();
+    const homeState: HomePageState = { notice: 'data-cleared' };
+    navigate(ROUTES.home, { state: homeState });
   }
 
   return (
@@ -120,6 +132,41 @@ function SettingsPage() {
         </SetupFieldset>
       </section>
 
+      <section aria-labelledby="clear-heading" className={styles.section}>
+        <h2 id="clear-heading">Clear all data</h2>
+        <p>
+          Erase all practice history, statistics, mistakes, and settings from this browser, and
+          start over as if the app were brand new.
+        </p>
+        <div>
+          <Button variant="danger" onClick={() => setIsConfirmingClear(true)}>
+            Clear All Application Data
+          </Button>
+        </div>
+      </section>
+
+      <ConfirmDialog
+        open={isConfirmingClear}
+        title="Clear all application data?"
+        message={
+          <>
+            <p>
+              This permanently erases <strong>everything</strong> saved in this browser:
+            </p>
+            <ul>
+              <li>all practice history and statistics</li>
+              <li>all saved mistakes</li>
+              <li>all of these settings</li>
+            </ul>
+            <p>This can't be undone.</p>
+          </>
+        }
+        confirmLabel="Erase All Data"
+        cancelLabel="Keep My Data"
+        tone="danger"
+        onConfirm={handleClearAll}
+        onCancel={() => setIsConfirmingClear(false)}
+      />
     </PageContainer>
   );
 }

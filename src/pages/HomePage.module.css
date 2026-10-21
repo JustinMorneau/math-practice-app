@@ -1,3 +1,12 @@
+.notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  background: var(--color-sun-soft);
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+}
+
 .hero {
   display: flex;
   flex-direction: column;

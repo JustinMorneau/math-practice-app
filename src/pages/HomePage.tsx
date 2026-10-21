@@ -1,7 +1,8 @@
+import { useLocation } from 'react-router';
 import { ButtonLink } from '../components/common/Button';
 import PageContainer from '../components/layout/PageContainer';
 import { APP_NAME } from '../app/constants';
-import { ROUTES } from '../app/routes';
+import { ROUTES, type HomePageState } from '../app/routes';
 import styles from './HomePage.module.css';
 
 const OPERATION_BLOCKS = [
@@ -13,8 +14,15 @@ const OPERATION_BLOCKS = [
 
 /** Landing page: a short welcome and the three main ways into the app. */
 function HomePage() {
+  const homeState = useLocation().state as HomePageState | null;
+
   return (
     <PageContainer title={APP_NAME} showTitle={false}>
+      {homeState?.notice === 'data-cleared' ? (
+        <p className={styles.notice}>
+          All app data was cleared, and the settings are back to how they started.
+        </p>
+      ) : null}
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.blocks} aria-hidden="true">
           {OPERATION_BLOCKS.map(({ symbol, className }) => (
