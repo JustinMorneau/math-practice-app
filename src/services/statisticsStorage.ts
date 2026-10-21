@@ -3,14 +3,9 @@
  * 20.3). Totals are stored separately from attempts, so trimming old
  * attempt records never shrinks the student's all-time totals.
  */
-import type { AppStatistics, PracticeAttempt } from '../types';
-import { loadAttempts, saveAttempt } from './historyStorage';
-import {
-  addAttemptToStatistics,
-  calculateStatistics,
-  createEmptyStatistics,
-  parseStatistics,
-} from './statisticsService';
+import type { AppStatistics } from '../types';
+import { loadAttempts } from './historyStorage';
+import { calculateStatistics, createEmptyStatistics, parseStatistics } from './statisticsService';
 import { STORAGE_KEYS, appStorage, type StorageService, type WriteResult } from './storageService';
 
 /**
@@ -36,28 +31,6 @@ export function loadStatistics(storage: StorageService = appStorage): AppStatist
 }
 
 /**
- * Saves an attempt and adds it to the statistics. Recording the same
- * attempt again does nothing, so totals are never counted twice.
- */
-export function recordAttempt(
-  attempt: PracticeAttempt,
-  storage: StorageService = appStorage,
-): WriteResult {
-  if (loadAttempts(storage).some(({ id }) => id === attempt.id)) {
-    return { ok: true };
-  }
-
-  // Load first: if statistics must be rebuilt from attempts, this attempt
-  // must not be in the list yet, or it would be counted twice.
-  const statistics = loadStatistics(storage);
-  const saved = saveAttempt(attempt, storage);
-  if (!saved.ok) {
-    return saved;
-  }
-  return storage.write(STORAGE_KEYS.statistics, addAttemptToStatistics(statistics, attempt));
-}
-
-/**
  * Erases practice history: attempts, sessions, statistics, and mistake
  * patterns. Settings are kept, since they are preferences rather than
  * history; clearing everything is a separate action on the settings page.
@@ -70,4 +43,11 @@ export function clearPracticeHistory(storage: StorageService = appStorage): Writ
     storage.remove(STORAGE_KEYS.mistakePatterns),
   ];
   return results.find((result) => !result.ok) ?? { ok: true };
+}
+
+export function saveStatistics(
+  statistics: AppStatistics,
+  storage: StorageService = appStorage,
+): WriteResult {
+  return storage.write(STORAGE_KEYS.statistics, statistics);
 }

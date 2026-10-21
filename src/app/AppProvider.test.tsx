@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
 import { loadAttempts, loadSessions } from '../services/historyStorage';
+import { loadMistakePatterns } from '../services/mistakeStorage';
 import { loadSettings } from '../services/settingsStorage';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
@@ -50,6 +51,30 @@ describe('AppProvider', () => {
     renderAppAt('/', { storage: createStorageService(storage) });
 
     expect(storage.getItem(STORAGE_KEYS.version)).toBe('{"version":1}');
+  });
+
+  it('removes invalid mistake records when the app starts', () => {
+    const valid = {
+      id: 'm-1',
+      operation: 'addition',
+      firstOperand: 4,
+      secondOperand: 5,
+      correctAnswer: 9,
+      difficulty: 1,
+      incorrectCount: 1,
+      similarCorrectCount: 0,
+      lastIncorrectAt: '2026-10-22T10:00:00.000Z',
+      mastered: false,
+    };
+    const corrupted = { ...valid, id: 'm-2', correctAnswer: 10 };
+    const browserStorage = new MemoryStorage({
+      [STORAGE_KEYS.mistakePatterns]: JSON.stringify([valid, corrupted]),
+    });
+
+    renderAppAt('/', { storage: createStorageService(browserStorage) });
+
+    const stored = browserStorage.getItem(STORAGE_KEYS.mistakePatterns) ?? '';
+    expect(JSON.parse(stored)).toEqual([valid]);
   });
 
   it('loads saved settings when the app starts', () => {
@@ -133,6 +158,25 @@ describe('saving practice', () => {
     expect(attempts.every(({ sessionId }) => sessionId === session.id)).toBe(true);
     expect(session).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 });
     expect(session.completedAt).toEqual(expect.any(String));
+  });
+
+  it('saves a mistake pattern when an answer is marked incorrect', async () => {
+    const storage = createStorageService(new MemoryStorage());
+    const user = userEvent.setup();
+    renderAppAt('/practice/session', { state: config, storage });
+
+    await answerCard(user, false);
+
+    const [attempt] = loadAttempts(storage);
+    const { patterns } = loadMistakePatterns(storage);
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0]).toMatchObject({
+      operation: attempt.operation,
+      firstOperand: attempt.firstOperand,
+      secondOperand: attempt.secondOperand,
+      correctAnswer: attempt.correctAnswer,
+      incorrectCount: 1,
+    });
   });
 
   it('does not save a session that was opened but never answered', () => {

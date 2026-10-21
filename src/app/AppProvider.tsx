@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { repairMistakePatterns } from '../services/mistakeStorage';
 import { ensureSchemaVersion } from '../services/schemaMigrations';
 import { loadSettings, saveSettings } from '../services/settingsStorage';
 import {
@@ -18,12 +19,15 @@ interface AppProviderProps {
 }
 
 /**
- * Prepares stored data when the app starts (schema version, then settings)
- * and shares settings and storage warnings with every page.
+ * Prepares stored data when the app starts (schema version, mistake-pattern
+ * check, then settings) and shares settings and storage warnings with
+ * every page.
  */
 function AppProvider({ children, storage = appStorage }: AppProviderProps) {
   const [settings, setSettings] = useState<AppSettings>(() => {
     ensureSchemaVersion(storage);
+    // Remove any corrupted mistake records before review uses them.
+    repairMistakePatterns(storage);
     return loadSettings(storage).settings;
   });
   const [storageWarning, setStorageWarning] = useState<StorageFailure | null>(

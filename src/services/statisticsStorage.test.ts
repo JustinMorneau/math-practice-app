@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryStorage } from '../test/storage';
 import type { PracticeAttempt } from '../types';
+import { recordAttempt } from './attemptRecorder';
 import { loadAttempts, loadSessions, saveAttempt, saveSession } from './historyStorage';
 import { calculateStatistics, createEmptyStatistics } from './statisticsService';
-import { clearPracticeHistory, loadStatistics, recordAttempt } from './statisticsStorage';
+import { clearPracticeHistory, loadStatistics } from './statisticsStorage';
 import { STORAGE_KEYS, createStorageService } from './storageService';
 
 function makeAttempt(id: string, overrides: Partial<PracticeAttempt> = {}): PracticeAttempt {
@@ -23,63 +24,6 @@ function makeAttempt(id: string, overrides: Partial<PracticeAttempt> = {}): Prac
     ...overrides,
   };
 }
-
-describe('recordAttempt', () => {
-  it('saves the attempt and adds it to the statistics', () => {
-    const storage = createStorageService(new MemoryStorage());
-
-    recordAttempt(makeAttempt('a-1'), storage);
-    const missedDivision = makeAttempt('a-2', {
-      selfReportedCorrect: false,
-      operation: 'division',
-    });
-    recordAttempt(missedDivision, storage);
-
-    expect(loadAttempts(storage)).toHaveLength(2);
-    const statistics = loadStatistics(storage);
-    expect(statistics).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 });
-    expect(statistics.byOperation.division).toEqual({ attempted: 1, correct: 0, incorrect: 1 });
-  });
-
-  it('never counts the same attempt twice', () => {
-    const storage = createStorageService(new MemoryStorage());
-    const attempt = makeAttempt('a-1');
-
-    recordAttempt(attempt, storage);
-    recordAttempt(attempt, storage);
-
-    expect(loadStatistics(storage).attempted).toBe(1);
-  });
-
-  it('counts the first attempt once when no statistics were stored yet', () => {
-    const storage = createStorageService(new MemoryStorage());
-    saveAttempt(makeAttempt('older'), storage);
-
-    recordAttempt(makeAttempt('new'), storage);
-
-    expect(loadStatistics(storage).attempted).toBe(2);
-  });
-
-  it('keeps all-time totals even after old attempts are trimmed', () => {
-    const storage = createStorageService(new MemoryStorage());
-    for (let i = 1; i <= 3; i += 1) {
-      recordAttempt(makeAttempt(`a-${i}`), storage);
-    }
-    // Simulate old records being removed to save space.
-    storage.write(STORAGE_KEYS.attempts, loadAttempts(storage).slice(-1));
-
-    expect(loadStatistics(storage).attempted).toBe(3);
-  });
-
-  it('reports a full storage', () => {
-    const storage = createStorageService(new MemoryStorage({}, 'quota-exceeded'));
-
-    expect(recordAttempt(makeAttempt('a-1'), storage)).toEqual({
-      ok: false,
-      reason: 'quota-exceeded',
-    });
-  });
-});
 
 describe('loadStatistics', () => {
   it('gives zero totals when nothing has been practiced, without saving anything', () => {

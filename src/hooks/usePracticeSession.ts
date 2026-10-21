@@ -9,7 +9,7 @@ import {
   practiceSessionReducer,
 } from '../services/practiceSession';
 import type { PracticeConfig } from '../types';
-import { recordAttempt } from '../services/statisticsStorage';
+import { recordAttempt } from '../services/attemptRecorder';
 import { createId } from '../utils/ids';
 
 export interface ReportedResult {
@@ -22,8 +22,9 @@ export interface ReportedResult {
  * running totals, the recorded attempts, and actions to record a result or
  * end the session early.
  *
- * The session and every attempt are saved as they happen, and each attempt
- * is added to the aggregate statistics, so progress
+ * The session and every attempt are saved as they happen; each attempt is
+ * added to the statistics, and incorrect answers become mistake patterns,
+ * so progress
  * survives closing the browser. A session is saved once its first question
  * is answered, so setups that were opened and abandoned are not stored.
  *

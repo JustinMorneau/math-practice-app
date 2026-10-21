@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
 import { loadAttempts } from '../services/historyStorage';
 import { loadSettings, saveSettings } from '../services/settingsStorage';
-import { recordAttempt } from '../services/statisticsStorage';
+import { recordAttempt } from '../services/attemptRecorder';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
 import { MemoryStorage } from '../test/storage';
