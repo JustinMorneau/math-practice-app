@@ -1,13 +1,26 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { loadAttempts, loadSessions } from '../services/historyStorage';
 import { loadSettings } from '../services/settingsStorage';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
 import { MemoryStorage } from '../test/storage';
+import type { PracticeConfig } from '../types';
 import { useAppData } from './AppDataContext';
 import AppProvider from './AppProvider';
+
+const config: PracticeConfig = { operations: ['addition'], difficulty: 1, sessionLength: 2 };
+
+async function answerCard(user: ReturnType<typeof userEvent.setup>, gotItRight: boolean) {
+  const choices = screen.getByRole('group', { name: 'Answer choices' });
+  await user.click(within(choices).getAllByRole('button')[0]);
+  await user.click(screen.getByRole('button', { name: 'Flip Card' }));
+  await user.click(
+    screen.getByRole('button', { name: gotItRight ? 'I Got It Right' : 'I Got It Wrong' }),
+  );
+}
 
 /** Shows one setting and changes it, to test the provider without a settings page. */
 function SettingsProbe() {
@@ -95,5 +108,46 @@ describe('AppProvider', () => {
     await user.click(screen.getByRole('button', { name: 'Got It' }));
 
     expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  });
+});
+
+describe('saving practice', () => {
+  it('saves the session and every attempt as the student practices', async () => {
+    const storage = createStorageService(new MemoryStorage());
+    const user = userEvent.setup();
+    renderAppAt('/practice/session', { state: config, storage });
+
+    await answerCard(user, true);
+    expect(loadAttempts(storage)).toHaveLength(1);
+    expect(loadSessions(storage)[0]).toMatchObject({ attempted: 1, correct: 1 });
+
+    await answerCard(user, false);
+    const attempts = loadAttempts(storage);
+    const [session] = loadSessions(storage);
+    expect(attempts.map(({ selfReportedCorrect }) => selfReportedCorrect)).toEqual([true, false]);
+    expect(attempts.every(({ sessionId }) => sessionId === session.id)).toBe(true);
+    expect(session).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 });
+    expect(session.completedAt).toEqual(expect.any(String));
+  });
+
+  it('does not save a session that was opened but never answered', () => {
+    const storage = createStorageService(new MemoryStorage());
+
+    renderAppAt('/practice/session', { state: config, storage });
+
+    expect(loadSessions(storage)).toEqual([]);
+  });
+
+  it('keeps practicing and warns when storage is full', async () => {
+    const browserStorage = new MemoryStorage();
+    const storage = createStorageService(browserStorage);
+    const user = userEvent.setup();
+    renderAppAt('/practice/session', { state: { ...config, sessionLength: 5 }, storage });
+
+    browserStorage.failureMode = 'quota-exceeded';
+    await answerCard(user, true);
+
+    expect(screen.getByRole('status')).toHaveTextContent(/storage is full/);
+    expect(screen.getByText('Question 2 of 5')).toBeInTheDocument();
   });
 });
