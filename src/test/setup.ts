@@ -2,8 +2,10 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
-// Vitest globals are disabled, so React Testing Library cannot register
-// its automatic cleanup. Unmount rendered trees after every test instead.
 afterEach(() => {
+  // Vitest globals are disabled, so React Testing Library cannot register
+  // its automatic cleanup. Unmount rendered trees after every test instead.
   cleanup();
+  // Saved progress must not leak from one test into the next.
+  localStorage.clear();
 });

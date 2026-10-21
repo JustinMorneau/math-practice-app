@@ -1,0 +1,31 @@
+.warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  max-width: var(--content-width);
+  margin: var(--space-4) auto 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-sun-soft);
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+}
+
+@media (min-width: 48rem) {
+  .warning {
+    margin-inline: var(--space-8);
+  }
+}
+
+@media (min-width: 64rem) {
+  .warning {
+    margin-inline: auto;
+  }
+}
+
+.message {
+  flex: 1 1 20rem;
+  margin: 0;
+  font-weight: 600;
+}

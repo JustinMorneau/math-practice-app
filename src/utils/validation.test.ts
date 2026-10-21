@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { PracticeConfig, PracticeSession } from '../types';
+import type { PracticeAttempt, PracticeConfig, PracticeSession } from '../types';
 import {
   isDifficultyLevel,
   isMathOperation,
+  isOperationList,
+  isPracticeAttempt,
   isPracticeConfig,
   isPracticeSession,
   isSessionLength,
@@ -99,5 +101,55 @@ describe('isPracticeSession', () => {
     ['a non-string completion time', { ...session, completedAt: 5 }],
   ])('rejects %s', (_description, value) => {
     expect(isPracticeSession(value)).toBe(false);
+  });
+});
+
+describe('isOperationList', () => {
+  it('accepts one or more different operations', () => {
+    expect(isOperationList(['addition'])).toBe(true);
+    expect(isOperationList(['addition', 'division'])).toBe(true);
+  });
+
+  it.each([
+    ['an empty list', []],
+    ['a duplicate', ['addition', 'addition']],
+    ['an unknown operation', ['addition', 'modulo']],
+    ['a non-list', 'addition'],
+  ])('rejects %s', (_description, value) => {
+    expect(isOperationList(value)).toBe(false);
+  });
+});
+
+describe('isPracticeAttempt', () => {
+  const attempt: PracticeAttempt = {
+    id: 'a-1',
+    questionId: 'q-1',
+    operation: 'division',
+    firstOperand: 56,
+    secondOperand: 7,
+    correctAnswer: 8,
+    selectedAnswer: 9,
+    selfReportedCorrect: false,
+    difficulty: 2,
+    source: 'regular',
+    attemptedAt: '2026-10-21T10:01:00.000Z',
+    sessionId: 's-1',
+  };
+
+  it('accepts a complete attempt', () => {
+    expect(isPracticeAttempt(attempt)).toBe(true);
+    expect(isPracticeAttempt({ ...attempt, source: 'mistake-review' })).toBe(true);
+  });
+
+  it.each([
+    ['null', null],
+    ['a missing session id', { ...attempt, sessionId: undefined }],
+    ['an unknown operation', { ...attempt, operation: 'modulo' }],
+    ['an invalid difficulty', { ...attempt, difficulty: 0 }],
+    ['a fractional answer', { ...attempt, selectedAnswer: 8.5 }],
+    ['a non-boolean result', { ...attempt, selfReportedCorrect: 'yes' }],
+    ['an unknown source', { ...attempt, source: 'quiz' }],
+  ])('rejects %s', (_description, value) => {
+    expect(isPracticeAttempt(value)).toBe(false);
   });
 });

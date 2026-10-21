@@ -1,8 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import AppRoutes from '../app/AppRoutes';
 import { renderAppAt } from '../test/renderWithRouter';
 
 function getStartButton() {
@@ -26,11 +24,7 @@ describe('PracticeSetupPage', () => {
 
   it('starts from previous choices passed in router state', () => {
     const state = { config: { operations: ['division'], difficulty: 4, sessionLength: 5 } };
-    render(
-      <MemoryRouter initialEntries={[{ pathname: '/practice/setup', state }]}>
-        <AppRoutes />
-      </MemoryRouter>,
-    );
+    renderAppAt('/practice/setup', { state });
 
     expect(screen.getByRole('checkbox', { name: 'Division' })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Addition' })).not.toBeChecked();

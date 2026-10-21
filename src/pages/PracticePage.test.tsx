@@ -1,19 +1,13 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import AppRoutes from '../app/AppRoutes';
 import { renderAppAt } from '../test/renderWithRouter';
 import type { PracticeConfig } from '../types';
 
 type User = ReturnType<typeof userEvent.setup>;
 
 function renderPracticeWithState(state: unknown) {
-  render(
-    <MemoryRouter initialEntries={[{ pathname: '/practice/session', state }]}>
-      <AppRoutes />
-    </MemoryRouter>,
-  );
+  renderAppAt('/practice/session', { state });
   return userEvent.setup();
 }
 

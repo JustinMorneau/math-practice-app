@@ -7,6 +7,7 @@ import {
   MATH_OPERATIONS,
   type DifficultyLevel,
   type MathOperation,
+  type PracticeAttempt,
   type PracticeConfig,
   type PracticeSession,
   type SessionLength,
@@ -25,6 +26,16 @@ export function isSessionLength(value: unknown): value is SessionLength {
   return value === 'continuous' || (Number.isInteger(value) && (value as number) > 0);
 }
 
+/** At least one supported operation, with no duplicates. */
+export function isOperationList(value: unknown): value is MathOperation[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(isMathOperation) &&
+    new Set(value).size === value.length
+  );
+}
+
 /** A complete setup with at least one operation and no duplicates. */
 export function isPracticeConfig(value: unknown): value is PracticeConfig {
   if (typeof value !== 'object' || value === null) {
@@ -34,12 +45,7 @@ export function isPracticeConfig(value: unknown): value is PracticeConfig {
   const { operations, difficulty, sessionLength } = value as Record<string, unknown>;
 
   return (
-    Array.isArray(operations) &&
-    operations.length > 0 &&
-    operations.every(isMathOperation) &&
-    new Set(operations).size === operations.length &&
-    isDifficultyLevel(difficulty) &&
-    isSessionLength(sessionLength)
+    isOperationList(operations) && isDifficultyLevel(difficulty) && isSessionLength(sessionLength)
   );
 }
 
@@ -68,5 +74,28 @@ export function isPracticeSession(value: unknown): value is PracticeSession {
     isCount(correct) &&
     isCount(incorrect) &&
     correct + incorrect === attempted
+  );
+}
+
+/** A stored record of one answered question (specification section 10.1). */
+export function isPracticeAttempt(value: unknown): value is PracticeAttempt {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const attempt = value as Record<string, unknown>;
+  return (
+    typeof attempt.id === 'string' &&
+    typeof attempt.questionId === 'string' &&
+    typeof attempt.sessionId === 'string' &&
+    typeof attempt.attemptedAt === 'string' &&
+    isMathOperation(attempt.operation) &&
+    isDifficultyLevel(attempt.difficulty) &&
+    Number.isInteger(attempt.firstOperand) &&
+    Number.isInteger(attempt.secondOperand) &&
+    Number.isInteger(attempt.correctAnswer) &&
+    Number.isInteger(attempt.selectedAnswer) &&
+    typeof attempt.selfReportedCorrect === 'boolean' &&
+    (attempt.source === 'regular' || attempt.source === 'mistake-review')
   );
 }

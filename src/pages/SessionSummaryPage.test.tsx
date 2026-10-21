@@ -1,8 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import AppRoutes from '../app/AppRoutes';
 import { renderAppAt } from '../test/renderWithRouter';
 import type { PracticeSession } from '../types';
 
@@ -23,11 +21,7 @@ function renderSummary(sessionOverrides: Partial<PracticeSession> = {}, reviewQu
 }
 
 function renderSummaryState(state: unknown) {
-  render(
-    <MemoryRouter initialEntries={[{ pathname: '/practice/summary', state }]}>
-      <AppRoutes />
-    </MemoryRouter>,
-  );
+  renderAppAt('/practice/summary', { state });
   return userEvent.setup();
 }
 

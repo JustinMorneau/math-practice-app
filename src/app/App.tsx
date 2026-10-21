@@ -1,12 +1,15 @@
 import { BrowserRouter } from 'react-router';
+import AppProvider from './AppProvider';
 import AppRoutes from './AppRoutes';
 
-/** Root component. Context providers (AppProvider) will wrap the routes in a later phase. */
+/** Root component: shared app data, then routing. */
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <AppProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AppProvider>
   );
 }
 
