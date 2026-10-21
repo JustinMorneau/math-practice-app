@@ -654,35 +654,35 @@ Initial routes:
 
 ### 66. Improve Keyboard Navigation
 
-- [ ] Ensure every control is reachable with Tab.
-- [ ] Add visible focus indicators.
-- [ ] Support Enter and Space on buttons.
-- [ ] Support number keys 1–4 for answer selection.
-- [ ] Prevent keyboard shortcuts from interfering with form inputs.
+- [x] Ensure every control is reachable with Tab.
+- [x] Add visible focus indicators.
+- [x] Support Enter and Space on buttons.
+- [x] Support number keys 1–4 for answer selection.
+- [x] Prevent keyboard shortcuts from interfering with form inputs.
 
 ### 67. Improve Screen-Reader Support
 
-- [ ] Use semantic HTML.
-- [ ] Add accessible labels to answer choices.
-- [ ] Announce question changes.
-- [ ] Announce the revealed correct answer.
-- [ ] Announce session progress.
-- [ ] Add accessible names to icon buttons.
+- [x] Use semantic HTML.
+- [x] Add accessible labels to answer choices.
+- [x] Announce question changes. _(Focus moves to each new problem, which is described by "Question X of Y".)_
+- [x] Announce the revealed correct answer.
+- [x] Announce session progress.
+- [x] Add accessible names to icon buttons. _(No icon-only buttons; icons inside labeled buttons are hidden from screen readers.)_
 
 ### 68. Support Reduced Motion
 
-- [ ] Detect `prefers-reduced-motion`.
-- [ ] Disable card animations when reduced motion is requested.
-- [ ] Ensure card content still changes clearly.
-- [ ] Respect the application's animation setting.
+- [x] Detect `prefers-reduced-motion`.
+- [x] Disable card animations when reduced motion is requested.
+- [x] Ensure card content still changes clearly.
+- [x] Respect the application's animation setting.
 
 ### 69. Check Visual Accessibility
 
-- [ ] Verify sufficient color contrast.
-- [ ] Avoid communicating results by color alone.
-- [ ] Add text or icons to selected states.
-- [ ] Test at 200% browser zoom.
-- [ ] Test with larger system font sizes.
+- [x] Verify sufficient color contrast. _(Every text pair passes WCAG AA 4.5:1, lowest 5.52:1; non-text elements pass 3:1.)_
+- [x] Avoid communicating results by color alone.
+- [x] Add text or icons to selected states.
+- [x] Test at 200% browser zoom. _(All pages checked at 200% and 400% zoom with no horizontal scrolling.)_
+- [x] Test with larger system font sizes. _(Checked with a 24px default font; overflow from long words fixed.)_
 
 ---
 
