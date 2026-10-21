@@ -48,17 +48,20 @@ describe('QuestionCard front', () => {
     renderCard();
 
     expect(screen.getByText('Question 3 of 10')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'What is 7 times 8?' })).toBeInTheDocument();
     const choices = within(screen.getByRole('group', { name: 'Answer choices' })).getAllByRole(
       'button',
     );
-    expect(choices.map((choice) => choice.textContent)).toEqual(['48', '54', '56', '64']);
+    // Each button is named by its answer; the small key number is hidden from screen readers.
+    ['48', '54', '56', '64'].forEach((answer, index) => {
+      expect(choices[index]).toHaveAccessibleName(answer);
+    });
   });
 
   it('describes the problem with the question number for screen readers', () => {
     renderCard();
 
-    expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).toHaveAccessibleDescription(
+    expect(screen.getByRole('heading', { name: 'What is 7 times 8?' })).toHaveAccessibleDescription(
       'Question 3 of 10',
     );
   });
@@ -111,7 +114,7 @@ describe('QuestionCard back', () => {
   it('reveals the correct answer and the student answer', async () => {
     await selectAndFlip('54');
 
-    expect(screen.getByRole('heading', { name: '7 × 8 = 56' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '7 times 8 equals 56' })).toBeInTheDocument();
     expect(screen.getByText(/your answer:/i)).toHaveTextContent('Your answer: 54');
   });
 
@@ -125,7 +128,7 @@ describe('QuestionCard back', () => {
   it('moves focus to the revealed answer', async () => {
     await selectAndFlip('56');
 
-    expect(screen.getByRole('heading', { name: '7 × 8 = 56' })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: '7 times 8 equals 56' })).toHaveFocus();
   });
 
   it('reports a correct result', async () => {
@@ -179,7 +182,7 @@ describe('QuestionCard behavior', () => {
 
     await user.click(getChoice('48'));
     await user.click(getFlipButton());
-    expect(screen.getByRole('heading', { name: '7 × 8 = 56' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '7 times 8 equals 56' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }));
 
     expect(onResult).toHaveBeenCalledWith({ selectedAnswer: 48, selfReportedCorrect: false });
@@ -188,13 +191,97 @@ describe('QuestionCard behavior', () => {
   it('can move focus to the problem when it appears', () => {
     renderCard({ focusOnMount: true });
 
-    expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'What is 7 times 8?' })).toHaveFocus();
   });
 
   it('does not move focus on its own by default', () => {
     renderCard();
 
-    expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).not.toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'What is 7 times 8?' })).not.toHaveFocus();
+  });
+});
+
+describe('QuestionCard keyboard shortcuts', () => {
+  it('selects an answer with number keys 1 to 4 and focuses it', async () => {
+    const { user } = renderCard();
+
+    await user.keyboard('2');
+    expect(getChoice('54')).toHaveAttribute('aria-pressed', 'true');
+    expect(getChoice('54')).toHaveFocus();
+    expect(getFlipButton()).toBeEnabled();
+
+    await user.keyboard('4');
+    expect(getChoice('64')).toHaveAttribute('aria-pressed', 'true');
+    expect(getChoice('54')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('tells assistive technology which key selects each answer', () => {
+    renderCard();
+
+    expect(getChoice('48')).toHaveAttribute('aria-keyshortcuts', '1');
+    expect(getChoice('64')).toHaveAttribute('aria-keyshortcuts', '4');
+  });
+
+  it('ignores keys without an answer, and keys combined with Ctrl, Alt, or Meta', async () => {
+    const { user } = renderCard();
+
+    await user.keyboard('5');
+    await user.keyboard('0');
+    await user.keyboard('{Control>}1{/Control}');
+
+    for (const name of ['48', '54', '56', '64']) {
+      expect(getChoice(name)).toHaveAttribute('aria-pressed', 'false');
+    }
+  });
+
+  it('does not change the answer after the card is flipped', async () => {
+    const { user } = renderCard();
+
+    await user.keyboard('3');
+    await user.click(getFlipButton());
+    await user.keyboard('1');
+
+    expect(screen.getByText(/your answer:/i)).toHaveTextContent('Your answer: 56');
+  });
+
+  it('does not take over number keys typed into a text field', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <label>
+          Name <input type="text" />
+        </label>
+        <QuestionCard
+          question={question}
+          questionNumber={1}
+          totalQuestions={5}
+          onResult={vi.fn()}
+        />
+      </>,
+    );
+
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), '12');
+
+    expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('12');
+    expect(getChoice('48')).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+describe('QuestionCard screen-reader text', () => {
+  it('reads the problem in words, with the symbols shown visually', () => {
+    renderCard();
+
+    const heading = screen.getByRole('heading', { name: 'What is 7 times 8?' });
+    expect(within(heading).getByText('7 × 8 = ?')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('reads the revealed answer in words', async () => {
+    const { user } = renderCard();
+
+    await user.click(getChoice('56'));
+    await user.click(getFlipButton());
+
+    expect(screen.getByRole('heading', { name: '7 times 8 equals 56' })).toHaveFocus();
   });
 });
 

@@ -44,3 +44,21 @@
   font-size: 1.125rem;
   line-height: 1;
 }
+
+/* Keyboard shortcut hint in the top-left corner */
+.shortcut {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-ink-soft);
+}
+
+/* Touch-only devices have no number keys to press */
+@media (hover: none) and (pointer: coarse) {
+  .shortcut {
+    display: none;
+  }
+}

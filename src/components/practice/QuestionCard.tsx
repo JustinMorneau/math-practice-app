@@ -35,8 +35,17 @@ interface QuestionCardProps {
  *
  * The face turned away is `inert` and `aria-hidden`, so it can't be focused,
  * clicked, or read by screen readers. Flipping moves focus to the back's
- * heading so the revealed answer is announced.
+ * heading so the revealed answer is announced. Number keys 1–4 choose an
+ * answer while the front is showing.
  */
+/** Whether a key event comes from a field the student types or chooses in. */
+function isFormControl(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+  );
+}
+
 function QuestionCard({
   question,
   questionNumber,
@@ -51,6 +60,7 @@ function QuestionCard({
   const [isFlipped, setIsFlipped] = useState(false);
   const frontHeadingRef = useRef<HTMLHeadingElement>(null);
   const backHeadingRef = useRef<HTMLHeadingElement>(null);
+  const choiceButtons = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     if (focusOnMount) {
@@ -63,6 +73,37 @@ function QuestionCard({
       backHeadingRef.current?.focus();
     }
   }, [isFlipped]);
+
+  // Number keys 1–4 choose an answer until the card is flipped.
+  useEffect(() => {
+    if (isFlipped) {
+      return undefined;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+      // Never take over keys typed into a text field or other form control.
+      if (isFormControl(event.target)) {
+        return;
+      }
+      if (!/^[1-9]$/.test(event.key)) {
+        return;
+      }
+      const index = Number(event.key) - 1;
+      if (index >= question.choices.length) {
+        return;
+      }
+      event.preventDefault();
+      setSelectedAnswer(question.choices[index]);
+      // Move focus to the chosen answer so screen readers announce it.
+      choiceButtons.current[index]?.focus();
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFlipped, question.choices]);
 
   function handleSelect(answer: number) {
     if (!isFlipped) {
@@ -109,6 +150,9 @@ function QuestionCard({
             onSelect={handleSelect}
             onFlip={handleFlip}
             headingRef={frontHeadingRef}
+            choiceRef={(index, button) => {
+              choiceButtons.current[index] = button;
+            }}
           />
         </section>
         <section

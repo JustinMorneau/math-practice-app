@@ -124,6 +124,20 @@
   }
 }
 
+/* Keyboard tip; hidden on touch-only devices, which have no number keys */
+.keyHint {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .keyHint {
+    display: none;
+  }
+}
+
 /* ---------- Back ---------- */
 .explanation {
   margin: 0;

@@ -1,6 +1,7 @@
 import { useState, type Ref } from 'react';
 import { getExplanation } from '../../services/explanations';
 import type { Question } from '../../types';
+import { formatSpokenProblem } from '../../utils/format';
 import { Button } from '../common/Button';
 import styles from './QuestionCard.module.css';
 
@@ -27,6 +28,10 @@ function CardBack({
   headingRef,
 }: CardBackProps) {
   const [hasReported, setHasReported] = useState(false);
+  const { operation, firstOperand, secondOperand, correctAnswer } = question;
+  // Read by screen readers instead of the symbols, e.g. "7 times 8 equals 56"
+  const spokenProblem = formatSpokenProblem(operation, firstOperand, secondOperand);
+  const spokenAnswer = `${spokenProblem} equals ${correctAnswer}`;
 
   function report(selfReportedCorrect: boolean) {
     if (hasReported) {
@@ -40,7 +45,10 @@ function CardBack({
     <>
       <p className={styles.meta}>The answer is</p>
       <h2 ref={headingRef} tabIndex={-1} className={`${styles.problem} ${styles.answerProblem}`}>
-        {question.displayText} = {question.correctAnswer}
+        <span aria-hidden="true">
+          {question.displayText} = {question.correctAnswer}
+        </span>
+        <span className="visually-hidden">{spokenAnswer}</span>
       </h2>
       {showExplanation ? <p className={styles.explanation}>{getExplanation(question)}</p> : null}
       <p className={styles.yourAnswer}>

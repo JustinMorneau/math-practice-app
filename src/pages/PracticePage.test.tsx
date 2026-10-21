@@ -49,7 +49,9 @@ describe('PracticePage: fixed-length sessions', () => {
     expect(getProgressBar()).toHaveAttribute('aria-valuenow', '0');
     expect(getProgressBar()).toHaveAttribute('aria-valuetext', '0 of 5 questions answered');
     expect(screen.getByText('Question 1 of 5')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/^\d+ − \d+ = \?$/);
+    expect(
+      screen.getByRole('heading', { level: 2, name: /^What is \d+ minus \d+\?$/ }),
+    ).toBeInTheDocument();
   });
 
   it('updates progress and moves to the next question after each result', async () => {
@@ -60,7 +62,7 @@ describe('PracticePage: fixed-length sessions', () => {
     expect(getProgressBar()).toHaveAttribute('aria-valuenow', '1');
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Flip Card' })).toBeDisabled();
-    expect(screen.getByRole('heading', { level: 2, name: /= \?$/ })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 2, name: /^What is / })).toHaveFocus();
   });
 
   it('shows the summary after the last question', async () => {

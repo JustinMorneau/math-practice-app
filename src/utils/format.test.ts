@@ -8,6 +8,7 @@ import {
   formatProblemText,
   formatQuestionCount,
   formatSessionLength,
+  formatSpokenProblem,
 } from './format';
 
 describe('formatOperationList', () => {
@@ -97,5 +98,16 @@ describe('formatPracticeSetup', () => {
       mode: 'mistake-review',
     };
     expect(formatPracticeSetup(review)).toBe('Mistake review: Multiplication');
+  });
+});
+
+describe('formatSpokenProblem', () => {
+  it.each([
+    ['addition', 7, 8, '7 plus 8'],
+    ['subtraction', 15, 8, '15 minus 8'],
+    ['multiplication', 7, 8, '7 times 8'],
+    ['division', 56, 7, '56 divided by 7'],
+  ] as const)('reads %s as "%s"', (operation, first, second, expected) => {
+    expect(formatSpokenProblem(operation, first, second)).toBe(expected);
   });
 });

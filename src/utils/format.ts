@@ -23,6 +23,26 @@ export function formatSessionLength(length: SessionLength): string {
   return length === 'continuous' ? 'No limit' : formatQuestionCount(length);
 }
 
+const SPOKEN_OPERATIONS: Record<MathOperation, string> = {
+  addition: 'plus',
+  subtraction: 'minus',
+  multiplication: 'times',
+  division: 'divided by',
+};
+
+/**
+ * The problem in words for screen readers, e.g. "7 times 8". Screen readers
+ * announce symbols such as ×, ÷, and − inconsistently, so cards include this
+ * text alongside the visible symbols.
+ */
+export function formatSpokenProblem(
+  operation: MathOperation,
+  firstOperand: number,
+  secondOperand: number,
+): string {
+  return `${firstOperand} ${SPOKEN_OPERATIONS[operation]} ${secondOperand}`;
+}
+
 /** The question as shown on a card, e.g. "7 × 8" or "56 ÷ 7". */
 export function formatProblemText(
   operation: MathOperation,
