@@ -142,9 +142,11 @@ describe('getFactFamilyProblems', () => {
 
 describe('getSimilarProblems', () => {
   it("matches the specification's example for 8 × 7", () => {
-    const { nearby, reversed, 'fact-family': factFamily } = getSimilarProblems(
-      pattern('multiplication', 8, 7),
-    );
+    const {
+      nearby,
+      reversed,
+      'fact-family': factFamily,
+    } = getSimilarProblems(pattern('multiplication', 8, 7));
     const all = texts([...nearby, ...reversed, ...factFamily]);
 
     for (const example of ['7 × 8', '8 × 6', '9 × 7', '56 ÷ 7', '56 ÷ 8']) {

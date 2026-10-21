@@ -1,35 +1,21 @@
-commit bedd5babedab31297c51a44e4f7820cfbd2c559d
+commit a46bcb9bbaaf7d73457fc61ed248a7c5d08f8e19
 Author: Claude <noreply@anthropic.com>
-Date:   Wed Oct 21 17:46:46 2026 -0400
+Date:   Wed Oct 21 17:59:53 2026 -0400
 
     style: apply Prettier formatting
 
-diff --git a/src/pages/StatisticsPage.tsx b/src/pages/StatisticsPage.tsx
-index f76c6f7..4972149 100644
---- a/src/pages/StatisticsPage.tsx
-+++ b/src/pages/StatisticsPage.tsx
-@@ -50,7 +50,9 @@ function StatisticsPage() {
- 
-   return (
-     <PageContainer title="Statistics">
--      <p role="status" aria-label="Statistics updates" className={styles.status}>{statusMessage}</p>
-+      <p role="status" aria-label="Statistics updates" className={styles.status}>
-+        {statusMessage}
-+      </p>
- 
-       {hasHistory ? (
-         <>
-diff --git a/src/services/statisticsService.ts b/src/services/statisticsService.ts
-index c209b18..b8bad1a 100644
---- a/src/services/statisticsService.ts
-+++ b/src/services/statisticsService.ts
-@@ -76,8 +76,7 @@ function isCounts(value: unknown): value is OperationStatistics {
-   return (
-     [attempted, correct, incorrect].every(
-       (count) => Number.isInteger(count) && (count as number) >= 0,
--    ) &&
--    (correct as number) + (incorrect as number) === attempted
-+    ) && (correct as number) + (incorrect as number) === attempted
-   );
- }
- 
+diff --git a/src/components/practice/CardBack.tsx b/src/components/practice/CardBack.tsx
+index ee86d12..4783a0e 100644
+--- a/src/components/practice/CardBack.tsx
++++ b/src/components/practice/CardBack.tsx
+@@ -42,9 +42,7 @@ function CardBack({
+       <h2 ref={headingRef} tabIndex={-1} className={`${styles.problem} ${styles.answerProblem}`}>
+         {question.displayText} = {question.correctAnswer}
+       </h2>
+-      {showExplanation ? (
+-        <p className={styles.explanation}>{getExplanation(question)}</p>
+-      ) : null}
++      {showExplanation ? <p className={styles.explanation}>{getExplanation(question)}</p> : null}
+       <p className={styles.yourAnswer}>
+         Your answer: <strong>{selectedAnswer}</strong>
+       </p>
