@@ -22,6 +22,11 @@ async function answerCard(user: ReturnType<typeof userEvent.setup>, gotItRight: 
   );
 }
 
+/** The live region where saving problems are announced. */
+function getWarningRegion() {
+  return screen.getByRole('status', { name: 'Saving progress' });
+}
+
 /** Shows one setting and changes it, to test the provider without a settings page. */
 function SettingsProbe() {
   const { settings, updateSettings } = useAppData();
@@ -91,13 +96,13 @@ describe('AppProvider', () => {
   it('shows no warning when storage works', () => {
     renderAppAt('/', { storage: createStorageService(new MemoryStorage()) });
 
-    expect(screen.getByRole('status')).toBeEmptyDOMElement();
+    expect(getWarningRegion()).toBeEmptyDOMElement();
   });
 
   it('warns, without crashing, when the browser blocks storage', () => {
     renderAppAt('/', { storage: createStorageService(null) });
 
-    expect(screen.getByRole('status')).toHaveTextContent(/isn't letting the app save/);
+    expect(getWarningRegion()).toHaveTextContent(/isn't letting the app save/);
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
@@ -107,7 +112,7 @@ describe('AppProvider', () => {
 
     await user.click(screen.getByRole('button', { name: 'Got It' }));
 
-    expect(screen.getByRole('status')).toBeEmptyDOMElement();
+    expect(getWarningRegion()).toBeEmptyDOMElement();
   });
 });
 
@@ -147,7 +152,7 @@ describe('saving practice', () => {
     browserStorage.failureMode = 'quota-exceeded';
     await answerCard(user, true);
 
-    expect(screen.getByRole('status')).toHaveTextContent(/storage is full/);
+    expect(getWarningRegion()).toHaveTextContent(/storage is full/);
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument();
   });
 });

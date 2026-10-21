@@ -16,7 +16,7 @@ function StorageWarning() {
   const { storageWarning, dismissStorageWarning } = useAppData();
 
   return (
-    <div role="status">
+    <div role="status" aria-label="Saving progress">
       {storageWarning === null ? null : (
         <div className={styles.warning}>
           <p className={styles.message}>{MESSAGES[storageWarning]}</p>

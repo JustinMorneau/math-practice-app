@@ -1,7 +1,15 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { renderAppAt } from '../test/renderWithRouter';
+
+/**
+ * The setup page's own status message. Scoped to <main> because the shared
+ * layout also has a status region for storage warnings.
+ */
+function getSetupMessage() {
+  return within(screen.getByRole('main')).getByRole('status');
+}
 
 function getStartButton() {
   return screen.getByRole('button', { name: 'Start Session' });
@@ -48,9 +56,7 @@ describe('PracticeSetupPage', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Addition' }));
 
     expect(getStartButton()).toBeDisabled();
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Pick at least one kind of problem to start.',
-    );
+    expect(getSetupMessage()).toHaveTextContent('Pick at least one kind of problem to start.');
     expect(getStartButton()).toHaveAccessibleDescription(/pick at least one kind of problem/i);
   });
 
@@ -62,7 +68,7 @@ describe('PracticeSetupPage', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Division' }));
 
     expect(getStartButton()).toBeEnabled();
-    expect(screen.getByRole('status')).toBeEmptyDOMElement();
+    expect(getSetupMessage()).toBeEmptyDOMElement();
   });
 
   it('passes the chosen setup to the practice session', async () => {
