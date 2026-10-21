@@ -2,13 +2,14 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
-import { loadAttempts, saveSession } from '../services/historyStorage';
+import { loadAttempts, saveAttempt, saveSession } from '../services/historyStorage';
+import { saveMistakePatterns } from '../services/mistakeStorage';
 import { loadSettings, saveSettings } from '../services/settingsStorage';
 import { recordAttempt } from '../services/attemptRecorder';
 import { createStorageService, type StorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
 import { MemoryStorage } from '../test/storage';
-import type { PracticeAttempt, PracticeConfig, PracticeSession } from '../types';
+import type { MistakePattern, PracticeAttempt, PracticeConfig, PracticeSession } from '../types';
 
 let attemptCount = 0;
 function attempt(overrides: Partial<PracticeAttempt>): PracticeAttempt {
@@ -224,5 +225,118 @@ describe('Statistics after practicing', () => {
     expect(statIn(getSection('Overall'), 'Answered')).toBe('1');
     expect(statIn(getSection('Overall'), 'To practice')).toBe('1');
     expect(statIn(getCard(getSection('By operation'), 'Multiplication'), 'To practice')).toBe('1');
+  });
+});
+
+describe('Mistake statistics', () => {
+  function mistake(id: string, overrides: Partial<MistakePattern> = {}): MistakePattern {
+    return {
+      id,
+      operation: 'multiplication',
+      firstOperand: 8,
+      secondOperand: 7,
+      correctAnswer: 56,
+      difficulty: 2,
+      incorrectCount: 1,
+      similarCorrectCount: 0,
+      lastIncorrectAt: '2026-10-20T10:00:00.000Z',
+      mastered: false,
+      ...overrides,
+    };
+  }
+
+  /** Storage with practice history, three mistakes (one mastered), and three review answers. */
+  function storageWithMistakes(): StorageService {
+    const storage = createStorageService(new MemoryStorage());
+    recordAttempt(attempt({ operation: 'multiplication', selfReportedCorrect: false }), storage);
+    recordAttempt(attempt({ operation: 'multiplication', selfReportedCorrect: false }), storage);
+    recordAttempt(attempt({ operation: 'addition', selfReportedCorrect: false }), storage);
+    saveMistakePatterns(
+      [
+        mistake('eight-sevens', { incorrectCount: 3, similarCorrectCount: 1 }),
+        mistake('nine-plus-six', {
+          operation: 'addition',
+          firstOperand: 9,
+          secondOperand: 6,
+          correctAnswer: 15,
+          lastIncorrectAt: '2026-10-21T10:00:00.000Z',
+        }),
+        mistake('six-sixes', {
+          firstOperand: 6,
+          secondOperand: 6,
+          correctAnswer: 36,
+          incorrectCount: 2,
+          similarCorrectCount: 3,
+          mastered: true,
+        }),
+      ],
+      storage,
+    );
+    for (const correct of [true, true, false]) {
+      saveAttempt(attempt({ source: 'mistake-review', selfReportedCorrect: correct }), storage);
+    }
+    return storage;
+  }
+
+  it('shows mistake totals and review answers', () => {
+    renderAppAt('/statistics', { storage: storageWithMistakes() });
+    const mistakes = getSection('Mistakes');
+
+    expect(statIn(mistakes, 'To review')).toBe('2');
+    expect(statIn(mistakes, 'Mastered')).toBe('1');
+    expect(statIn(mistakes, 'Review questions')).toBe('3');
+    expect(statIn(mistakes, 'Review answers right')).toBe('2');
+  });
+
+  it('names the most often missed operation', () => {
+    renderAppAt('/statistics', { storage: storageWithMistakes() });
+
+    expect(getSection('Mistakes').getByText(/most often missed/i)).toHaveTextContent(
+      'Most often missed: Multiplication',
+    );
+  });
+
+  it('lists the most missed facts first', () => {
+    renderAppAt('/statistics', { storage: storageWithMistakes() });
+    const heading = getSection('Mistakes').getByRole('heading', { name: 'Most missed facts' });
+    const topFacts = within(heading.nextElementSibling as HTMLElement);
+
+    const facts = topFacts.getAllByRole('listitem').map((item) => item.textContent);
+    expect(facts).toEqual([
+      '8 × 7 = 56missed 3 times',
+      '6 × 6 = 36missed 2 times',
+      '9 + 6 = 15missed 1 time',
+    ]);
+  });
+
+  it('shows each mistake to review with its progress and last missed date', () => {
+    renderAppAt('/statistics', { storage: storageWithMistakes() });
+    const toReview = getSection('Mistakes').getByRole('heading', { name: 'Mistakes to review' });
+    const list = within(toReview.nextElementSibling as HTMLElement);
+
+    const items = list.getAllByRole('listitem');
+    expect(items).toHaveLength(2);
+    expect(within(items[0]).getByText('8 × 7 = 56')).toBeInTheDocument();
+    expect(statIn(within(items[0]), 'Missed')).toBe('3 times');
+    expect(statIn(within(items[0]), 'Progress')).toBe('1 of 3 right');
+    expect(items[1].querySelector('time')).toHaveAttribute('dateTime', '2026-10-21T10:00:00.000Z');
+  });
+
+  it('keeps mastered mistakes in a separate, collapsed section', () => {
+    renderAppAt('/statistics', { storage: storageWithMistakes() });
+
+    // A native <details> element, which the student opens with its summary.
+    const details = screen.getByText('Mastered mistakes (1)').closest('details') as HTMLElement;
+    expect(details).not.toHaveAttribute('open');
+    expect(within(details).getByText('6 × 6 = 36')).toBeInTheDocument();
+    expect(within(details).getByText('Mastered')).toBeInTheDocument();
+  });
+
+  it('shows an empty state when there are no mistakes', () => {
+    const storage = createStorageService(new MemoryStorage());
+    recordAttempt(attempt({ selfReportedCorrect: true }), storage);
+    renderAppAt('/statistics', { storage });
+
+    expect(getSection('Mistakes').getByText(/no mistakes yet/i)).toBeInTheDocument();
   });
 });

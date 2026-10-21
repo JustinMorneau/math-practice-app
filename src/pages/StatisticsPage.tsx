@@ -6,11 +6,13 @@ import ConfirmDialog from '../components/common/ConfirmDialog';
 import EmptyState from '../components/common/EmptyState';
 import OperationSymbol from '../components/common/OperationSymbol';
 import PageContainer from '../components/layout/PageContainer';
+import MistakeStatistics from '../components/statistics/MistakeStatistics';
 import PerformanceCard from '../components/statistics/PerformanceCard';
 import RecentSessions from '../components/statistics/RecentSessions';
 import StatGrid from '../components/statistics/StatGrid';
 import { DIFFICULTY_DETAILS, OPERATION_DETAILS } from '../constants/practiceOptions';
-import { loadRecentSessions } from '../services/historyStorage';
+import { loadAttempts, loadRecentSessions } from '../services/historyStorage';
+import { loadMistakePatterns } from '../services/mistakeStorage';
 import { getAccuracy } from '../services/statisticsService';
 import { clearPracticeHistory, loadStatistics } from '../services/statisticsStorage';
 import type { StorageService } from '../services/storageService';
@@ -24,13 +26,19 @@ function loadPageData(storage: StorageService) {
   return {
     statistics: loadStatistics(storage),
     recentSessions: loadRecentSessions(RECENT_SESSION_COUNT, storage),
+    mistakePatterns: loadMistakePatterns(storage).patterns,
+    attempts: loadAttempts(storage),
   };
 }
 
-/** Overall, per-operation, and per-level performance plus recent sessions (specification 6.6). */
+/**
+ * Overall, per-operation, and per-level performance, mistake statistics,
+ * and recent sessions (specification 6.6).
+ */
 function StatisticsPage() {
-  const { storage, reportStorageResult } = useAppData();
-  const [{ statistics, recentSessions }, setData] = useState(() => loadPageData(storage));
+  const { storage, settings, reportStorageResult } = useAppData();
+  const [data, setData] = useState(() => loadPageData(storage));
+  const { statistics, recentSessions } = data;
   const [isConfirmingReset, setIsConfirmingReset] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
 
@@ -94,6 +102,16 @@ function StatisticsPage() {
                 />
               ))}
             </div>
+          </section>
+
+          <section aria-labelledby="mistakes-heading" className={styles.section}>
+            <h2 id="mistakes-heading">Mistakes</h2>
+            <MistakeStatistics
+              patterns={data.mistakePatterns}
+              attempts={data.attempts}
+              statistics={statistics}
+              masteryThreshold={settings.masteryThreshold}
+            />
           </section>
 
           <section aria-labelledby="recent-heading" className={styles.section}>
