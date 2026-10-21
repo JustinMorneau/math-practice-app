@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { renderAppAt } from '../../test/renderWithRouter';
@@ -33,5 +33,45 @@ describe('Navigation', () => {
     await user.click(within(getMainNav()).getByRole('link', { name: 'Settings' }));
 
     expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
+  });
+});
+
+describe('Navigation menu on narrow screens', () => {
+  // The Menu button is shown only on narrow screens; the test environment is
+  // wide, so it is found with `hidden: true` and clicked directly.
+  function getMenuButton() {
+    return within(getMainNav()).getByRole('button', { name: 'Menu', hidden: true });
+  }
+
+  it('reports whether the menu is open and which list it controls', () => {
+    renderAppAt('/');
+    const menuButton = getMenuButton();
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+    expect(menuButton).toHaveAttribute('aria-controls', within(getMainNav()).getByRole('list').id);
+
+    fireEvent.click(menuButton);
+
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('closes after choosing a page', async () => {
+    const user = userEvent.setup();
+    renderAppAt('/');
+    fireEvent.click(getMenuButton());
+
+    await user.click(within(getMainNav()).getByRole('link', { name: 'Statistics' }));
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Statistics' })).toBeInTheDocument();
+    expect(getMenuButton()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('closes with Escape and returns focus to the Menu button', () => {
+    renderAppAt('/');
+    fireEvent.click(getMenuButton());
+
+    fireEvent.keyDown(within(getMainNav()).getByRole('link', { name: 'Home' }), { key: 'Escape' });
+
+    expect(getMenuButton()).toHaveAttribute('aria-expanded', 'false');
+    expect(getMenuButton()).toHaveFocus();
   });
 });

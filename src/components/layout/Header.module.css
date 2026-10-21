@@ -1,4 +1,7 @@
 .header {
+  /* Anchors the narrow-screen menu panel just below the header */
+  position: relative;
+  z-index: 5;
   background: var(--color-surface);
   border-bottom: var(--border-chunky);
 }
@@ -12,6 +15,12 @@
   max-width: var(--content-width);
   margin-inline: auto;
   padding: var(--space-3) var(--space-4);
+}
+
+@media (max-height: 30rem) {
+  .inner {
+    padding-block: var(--space-1);
+  }
 }
 
 .brand {
@@ -59,4 +68,24 @@
 .mark > .divide {
   color: var(--color-ink);
   background: var(--color-sun);
+}
+
+/* Narrow screens: a compact title so it fits on one row with the Menu
+   button; with very large fonts the button can still wrap below. */
+@media (max-width: 43.99rem) {
+  .inner {
+    column-gap: var(--space-3);
+  }
+
+  .brand {
+    gap: var(--space-2);
+    font-size: var(--text-base);
+  }
+}
+
+/* The very narrowest screens: the title text is enough without the logo */
+@media (max-width: 22rem) {
+  .mark {
+    display: none;
+  }
 }
