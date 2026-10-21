@@ -42,9 +42,7 @@ function CardBack({
       <h2 ref={headingRef} tabIndex={-1} className={`${styles.problem} ${styles.answerProblem}`}>
         {question.displayText} = {question.correctAnswer}
       </h2>
-      {showExplanation ? (
-        <p className={styles.explanation}>{getExplanation(question)}</p>
-      ) : null}
+      {showExplanation ? <p className={styles.explanation}>{getExplanation(question)}</p> : null}
       <p className={styles.yourAnswer}>
         Your answer: <strong>{selectedAnswer}</strong>
       </p>
