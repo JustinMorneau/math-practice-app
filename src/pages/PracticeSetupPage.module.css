@@ -56,3 +56,11 @@
     width: 100%;
   }
 }
+
+.reviewNote {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-sun-soft);
+  border: 2px dashed var(--color-ink-soft);
+  border-radius: var(--radius-block);
+}

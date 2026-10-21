@@ -2,27 +2,44 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { useAppData } from '../app/AppDataContext';
 import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../app/routes';
-import { Button } from '../components/common/Button';
+import { Button, ButtonLink } from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
 import PageContainer from '../components/layout/PageContainer';
 import ProgressBar from '../components/practice/ProgressBar';
 import QuestionCard from '../components/practice/QuestionCard';
 import { usePracticeSession } from '../hooks/usePracticeSession';
+import { getActivePatterns } from '../services/mistakeReview';
+import { loadMistakePatterns } from '../services/mistakeStorage';
 import type { PracticeConfig } from '../types';
-import { formatDifficulty, formatOperationList, formatQuestionCount } from '../utils/format';
+import { formatPracticeSetup, formatQuestionCount } from '../utils/format';
 import { isPracticeConfig } from '../utils/validation';
 import styles from './PracticePage.module.css';
 
 /**
  * Runs a practice session for the setup chosen on the practice setup page.
  * Without a valid setup (for example, after typing the URL directly), the
- * student is sent to the setup page with a short explanation.
+ * student is sent to the setup page with a short explanation. A review
+ * session with no mistakes left to review explains that instead.
  */
 function PracticePage() {
   const location = useLocation();
+  const { storage } = useAppData();
 
   if (!isPracticeConfig(location.state)) {
     const setupState: PracticeSetupState = { notice: 'session-missing' };
     return <Navigate to={ROUTES.practiceSetup} replace state={setupState} />;
+  }
+
+  const isReview = location.state.mode === 'mistake-review';
+  if (isReview && getActivePatterns(loadMistakePatterns(storage).patterns).length === 0) {
+    return (
+      <PageContainer title="Practice">
+        <EmptyState
+          message="There are no mistakes to review right now. Nice work!"
+          action={<ButtonLink to={ROUTES.practiceSetup}>Start Practice</ButtonLink>}
+        />
+      </PageContainer>
+    );
   }
 
   // Keyed by the history entry, so every navigation here starts a fresh session.
@@ -64,9 +81,7 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
   return (
     <PageContainer title="Practice" showTitle={false}>
       <h1 className="visually-hidden">Practice</h1>
-      <p className={styles.details}>
-        {formatOperationList(config.operations)}, {formatDifficulty(config.difficulty)} level
-      </p>
+      <p className={styles.details}>{formatPracticeSetup(config)}</p>
 
       {totalQuestions === null ? (
         <p className={styles.details}>{session.attempted} answered so far</p>

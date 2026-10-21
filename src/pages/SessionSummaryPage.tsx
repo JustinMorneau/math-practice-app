@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { useAppData } from '../app/AppDataContext';
 import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../app/routes';
 import { Button, ButtonLink } from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
 import PageContainer from '../components/layout/PageContainer';
 import StatGrid from '../components/statistics/StatGrid';
 import { getEncouragement } from '../services/encouragement';
+import { getActivePatterns, getPatternOperations } from '../services/mistakeReview';
+import { loadMistakePatterns } from '../services/mistakeStorage';
 import { getTotalQuestions } from '../services/practiceSession';
 import type { PracticeConfig } from '../types';
-import { formatDifficulty, formatOperationList } from '../utils/format';
+import { formatPracticeSetup } from '../utils/format';
 import { calculateAccuracy } from '../utils/math';
 import { isPracticeSession } from '../utils/validation';
 import styles from './SessionSummaryPage.module.css';
@@ -47,6 +51,8 @@ function SessionSummaryPage() {
 
 function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
   const navigate = useNavigate();
+  const { storage } = useAppData();
+  const [activeMistakes] = useState(() => getActivePatterns(loadMistakePatterns(storage).patterns));
   const { attempted, correct, incorrect, operations, difficulty, sessionLength } = session;
   const accuracy = calculateAccuracy(correct, attempted);
   const { headline, message, reviewTip } = getEncouragement({
@@ -56,10 +62,19 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
     accuracy,
   });
 
-  const config: PracticeConfig = { operations, difficulty, sessionLength };
+  const mode = session.mode ?? 'regular';
+  const config: PracticeConfig = { operations, difficulty, sessionLength, mode };
   const total = getTotalQuestions(sessionLength);
-  const endedEarly = total !== null && attempted < total;
+  // A review session also ends early when every mistake has been mastered.
+  const masteredEverything = mode === 'mistake-review' && activeMistakes.length === 0;
+  const endedEarly = total !== null && attempted < total && !masteredEverything;
   const setupState: PracticeSetupState = { config };
+  const reviewConfig: PracticeConfig = {
+    operations: getPatternOperations(activeMistakes),
+    difficulty,
+    sessionLength,
+    mode: 'mistake-review',
+  };
 
   return (
     <PageContainer title="Session Summary">
@@ -78,10 +93,9 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
       />
 
       <div className={styles.notes}>
-        <p>
-          {formatOperationList(operations)}, {formatDifficulty(difficulty)} level
-        </p>
+        <p>{formatPracticeSetup(config)}</p>
         <p>Mistake-review questions completed: {reviewQuestionCount}</p>
+        {masteredEverything ? <p>You mastered every mistake on your list. Amazing!</p> : null}
         {endedEarly ? <p>{`You ended after ${attempted} of ${total} questions.`}</p> : null}
         {reviewTip ? <p>{reviewTip}</p> : null}
       </div>
@@ -90,6 +104,14 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
         <Button size="large" onClick={() => navigate(ROUTES.practiceSession, { state: config })}>
           Practice Again
         </Button>
+        {activeMistakes.length > 0 ? (
+          <Button
+            variant="secondary"
+            onClick={() => navigate(ROUTES.practiceSession, { state: reviewConfig })}
+          >
+            Practice Mistakes
+          </Button>
+        ) : null}
         <ButtonLink to={ROUTES.practiceSetup} state={setupState} variant="secondary">
           Change Settings
         </ButtonLink>

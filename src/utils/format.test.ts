@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import type { PracticeConfig } from '../types';
 import {
   formatDateTime,
   formatDifficulty,
   formatOperationList,
+  formatPracticeSetup,
   formatProblemText,
   formatQuestionCount,
   formatSessionLength,
@@ -77,5 +79,23 @@ describe('formatDateTime', () => {
 
   it('returns the original text when it is not a valid date', () => {
     expect(formatDateTime('not a date')).toBe('not a date');
+  });
+});
+
+describe('formatPracticeSetup', () => {
+  it('describes regular practice by operations and level', () => {
+    expect(formatPracticeSetup({ operations: ['addition', 'division'], difficulty: 2 })).toBe(
+      'Addition and Division, Easy level',
+    );
+  });
+
+  it('describes review sessions without a single level', () => {
+    const review: PracticeConfig = {
+      operations: ['multiplication'],
+      difficulty: 3,
+      sessionLength: 10,
+      mode: 'mistake-review',
+    };
+    expect(formatPracticeSetup(review)).toBe('Mistake review: Multiplication');
   });
 });

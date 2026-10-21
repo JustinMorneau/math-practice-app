@@ -1,5 +1,5 @@
 import { DIFFICULTY_DETAILS, OPERATION_DETAILS } from '../constants/practiceOptions';
-import type { DifficultyLevel, MathOperation, SessionLength } from '../types';
+import type { DifficultyLevel, MathOperation, PracticeConfig, SessionLength } from '../types';
 
 const listFormatter = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
 
@@ -41,4 +41,19 @@ const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
 export function formatDateTime(isoTimestamp: string): string {
   const date = new Date(isoTimestamp);
   return Number.isNaN(date.getTime()) ? isoTimestamp : dateTimeFormatter.format(date);
+}
+
+/**
+ * A one-line description of what was practiced: "Addition and Division,
+ * Easy level", or "Mistake review: Multiplication" for review sessions,
+ * whose questions come from mistakes at several levels.
+ */
+export function formatPracticeSetup({
+  operations,
+  difficulty,
+  mode,
+}: Pick<PracticeConfig, 'operations' | 'difficulty' | 'mode'>): string {
+  return mode === 'mistake-review'
+    ? `Mistake review: ${formatOperationList(operations)}`
+    : `${formatOperationList(operations)}, ${formatDifficulty(difficulty)} level`;
 }

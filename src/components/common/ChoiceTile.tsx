@@ -16,6 +16,8 @@ interface ChoiceTileProps {
   description?: string;
   /** Decorative content shown before the label, such as an operation symbol. */
   icon?: ReactNode;
+  /** Unavailable choices stay visible; the description should say why. */
+  disabled?: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ function ChoiceTile({
   label,
   description,
   icon,
+  disabled = false,
 }: ChoiceTileProps) {
   const labelId = useId();
   const descriptionId = useId();
@@ -47,6 +50,7 @@ function ChoiceTile({
         name={name}
         value={value}
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
         aria-labelledby={labelId}
         aria-describedby={description ? descriptionId : undefined}

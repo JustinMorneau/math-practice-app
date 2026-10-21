@@ -29,6 +29,14 @@
   transform: translateY(var(--block-depth));
 }
 
+.tile:has(.input:disabled) {
+  color: var(--color-ink-soft);
+  background: var(--color-disabled);
+  border-color: var(--color-disabled-edge);
+  box-shadow: 0 var(--block-depth) 0 var(--color-disabled-edge);
+  cursor: not-allowed;
+}
+
 .tile:has(.input:focus-visible) {
   outline: 3px solid var(--color-ink);
   outline-offset: 3px;

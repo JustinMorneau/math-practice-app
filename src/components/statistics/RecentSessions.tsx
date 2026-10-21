@@ -1,5 +1,5 @@
 import type { PracticeSession } from '../../types';
-import { formatDateTime, formatDifficulty, formatOperationList } from '../../utils/format';
+import { formatDateTime, formatPracticeSetup } from '../../utils/format';
 import { calculateAccuracy } from '../../utils/math';
 import styles from './RecentSessions.module.css';
 
@@ -13,9 +13,7 @@ function RecentSessions({ sessions }: { sessions: readonly PracticeSession[] }) 
             <time dateTime={session.startedAt}>{formatDateTime(session.startedAt)}</time>
             {session.completedAt ? null : <span className={styles.badge}>Not finished</span>}
           </p>
-          <p className={styles.setup}>
-            {formatOperationList(session.operations)}, {formatDifficulty(session.difficulty)} level
-          </p>
+          <p className={styles.setup}>{formatPracticeSetup(session)}</p>
           <dl className={styles.counts}>
             <div>
               <dt>Answered</dt>
