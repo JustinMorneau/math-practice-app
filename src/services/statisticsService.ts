@@ -76,8 +76,7 @@ function isCounts(value: unknown): value is OperationStatistics {
   return (
     [attempted, correct, incorrect].every(
       (count) => Number.isInteger(count) && (count as number) >= 0,
-    ) &&
-    (correct as number) + (incorrect as number) === attempted
+    ) && (correct as number) + (incorrect as number) === attempted
   );
 }
 

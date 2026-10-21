@@ -1,0 +1,21 @@
+commit 590d43c8ced7ddd9c93455cccf9c95ea86e051b4
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Oct 21 13:25:57 2026 -0400
+
+    style: apply Prettier formatting
+
+diff --git a/src/pages/SessionSummaryPage.tsx b/src/pages/SessionSummaryPage.tsx
+index fb60174..7a439b2 100644
+--- a/src/pages/SessionSummaryPage.tsx
++++ b/src/pages/SessionSummaryPage.tsx
+@@ -87,7 +87,9 @@ function SessionSummary({ session, reviewQuestionCount }: SessionSummaryState) {
+       </dl>
+ 
+       <div className={styles.notes}>
+-        <p>{formatOperationList(operations)}, {formatDifficulty(difficulty)} level</p>
++        <p>
++          {formatOperationList(operations)}, {formatDifficulty(difficulty)} level
++        </p>
+         <p>Mistake-review questions completed: {reviewQuestionCount}</p>
+         {endedEarly ? <p>{`You ended after ${attempted} of ${total} questions.`}</p> : null}
+         {reviewTip ? <p>{reviewTip}</p> : null}

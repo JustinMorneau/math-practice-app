@@ -50,7 +50,9 @@ function StatisticsPage() {
 
   return (
     <PageContainer title="Statistics">
-      <p role="status" aria-label="Statistics updates" className={styles.status}>{statusMessage}</p>
+      <p role="status" aria-label="Statistics updates" className={styles.status}>
+        {statusMessage}
+      </p>
 
       {hasHistory ? (
         <>
