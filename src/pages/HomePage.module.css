@@ -18,6 +18,8 @@
 /* The four operations as chunky, slightly scattered counting blocks */
 .blocks {
   display: flex;
+  /* Wrap onto a second row rather than overflow with very large fonts */
+  flex-wrap: wrap;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
 }

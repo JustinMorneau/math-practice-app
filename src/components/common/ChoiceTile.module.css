@@ -93,6 +93,8 @@
 }
 
 .label {
+  /* Very large fonts can make a word like "Multiplication" wider than the tile */
+  overflow-wrap: anywhere;
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.3;

@@ -20,8 +20,14 @@
   flex: none;
 }
 
+.header > div {
+  min-width: 0;
+}
+
 .title {
   margin: 0;
+  /* Very large fonts can make a word like "Multiplication" wider than the card */
+  overflow-wrap: anywhere;
   font-size: var(--text-lg);
 }
 
