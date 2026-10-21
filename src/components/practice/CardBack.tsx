@@ -1,4 +1,5 @@
 import { useState, type Ref } from 'react';
+import { getExplanation } from '../../services/explanations';
 import type { Question } from '../../types';
 import { Button } from '../common/Button';
 import styles from './QuestionCard.module.css';
@@ -6,6 +7,8 @@ import styles from './QuestionCard.module.css';
 interface CardBackProps {
   question: Question;
   selectedAnswer: number | null;
+  /** Show a one-line explanation of the answer. */
+  showExplanation: boolean;
   /** Called once with the student's own judgment of their answer. */
   onReport: (selfReportedCorrect: boolean) => void;
   headingRef: Ref<HTMLHeadingElement>;
@@ -16,7 +19,13 @@ interface CardBackProps {
  * answer, and buttons for the student to report how they did. After one
  * button is pressed, both are disabled so the attempt is counted only once.
  */
-function CardBack({ question, selectedAnswer, onReport, headingRef }: CardBackProps) {
+function CardBack({
+  question,
+  selectedAnswer,
+  showExplanation,
+  onReport,
+  headingRef,
+}: CardBackProps) {
   const [hasReported, setHasReported] = useState(false);
 
   function report(selfReportedCorrect: boolean) {
@@ -30,9 +39,12 @@ function CardBack({ question, selectedAnswer, onReport, headingRef }: CardBackPr
   return (
     <>
       <p className={styles.meta}>The answer is</p>
-      <h2 ref={headingRef} tabIndex={-1} className={styles.problem}>
+      <h2 ref={headingRef} tabIndex={-1} className={`${styles.problem} ${styles.answerProblem}`}>
         {question.displayText} = {question.correctAnswer}
       </h2>
+      {showExplanation ? (
+        <p className={styles.explanation}>{getExplanation(question)}</p>
+      ) : null}
       <p className={styles.yourAnswer}>
         Your answer: <strong>{selectedAnswer}</strong>
       </p>

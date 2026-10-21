@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { playSound } from '../../services/soundEffects';
 import type { Question } from '../../types';
 import CardBack from './CardBack';
 import CardFront from './CardFront';
@@ -18,6 +19,10 @@ interface QuestionCardProps {
   onResult: (result: CardResult) => void;
   /** Animate the flip. When false (or with reduced motion), faces switch instantly. */
   animated?: boolean;
+  /** Show a short explanation on the back of the card. */
+  showExplanation?: boolean;
+  /** Play a tick on flipping and a chime for "I Got It Right". */
+  soundEffects?: boolean;
   /** Move keyboard focus to the problem when the card appears (for every card after the first). */
   focusOnMount?: boolean;
 }
@@ -38,6 +43,8 @@ function QuestionCard({
   totalQuestions,
   onResult,
   animated = true,
+  showExplanation = true,
+  soundEffects = false,
   focusOnMount = false,
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -66,11 +73,17 @@ function QuestionCard({
   function handleFlip() {
     if (selectedAnswer !== null) {
       setIsFlipped(true);
+      if (soundEffects) {
+        playSound('flip');
+      }
     }
   }
 
   function handleReport(selfReportedCorrect: boolean) {
     if (selectedAnswer !== null) {
+      if (soundEffects && selfReportedCorrect) {
+        playSound('correct');
+      }
       onResult({ selectedAnswer, selfReportedCorrect });
     }
   }
@@ -108,6 +121,7 @@ function QuestionCard({
             <CardBack
               question={question}
               selectedAnswer={selectedAnswer}
+              showExplanation={showExplanation}
               onReport={handleReport}
               headingRef={backHeadingRef}
             />

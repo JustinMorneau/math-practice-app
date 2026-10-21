@@ -95,6 +95,12 @@
   overflow-wrap: anywhere;
 }
 
+/* The answer line is longer than the question, so it is a little smaller
+   to stay on one line. */
+.answerProblem {
+  font-size: clamp(2.25rem, 1.75rem + 3vw, 3.25rem);
+}
+
 /* Focus is moved here for screen readers; the heading isn't a control. */
 .problem:focus {
   outline: none;
@@ -119,6 +125,16 @@
 }
 
 /* ---------- Back ---------- */
+.explanation {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  text-align: center;
+  background: var(--color-surface);
+  border: 2px dashed var(--color-ink-soft);
+  border-radius: var(--radius-block);
+}
+
 .yourAnswer {
   margin: 0;
   font-size: var(--text-lg);

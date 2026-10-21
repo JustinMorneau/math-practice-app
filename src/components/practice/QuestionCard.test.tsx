@@ -1,8 +1,11 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { playSound } from '../../services/soundEffects';
 import type { Question } from '../../types';
 import QuestionCard from './QuestionCard';
+
+vi.mock('../../services/soundEffects', () => ({ playSound: vi.fn() }));
 
 const question: Question = {
   id: 'q-test',
@@ -192,5 +195,63 @@ describe('QuestionCard behavior', () => {
     renderCard();
 
     expect(screen.getByRole('heading', { name: '7 × 8 = ?' })).not.toHaveFocus();
+  });
+});
+
+describe('QuestionCard explanations', () => {
+  it('explains the answer on the back by default', async () => {
+    const { user } = renderCard();
+
+    await user.click(getChoice('56'));
+    await user.click(getFlipButton());
+
+    expect(screen.getByText('7 × 8 means 7 groups of 8, which makes 56.')).toBeInTheDocument();
+  });
+
+  it('leaves the explanation out when turned off', async () => {
+    const { user } = renderCard({ showExplanation: false });
+
+    await user.click(getChoice('56'));
+    await user.click(getFlipButton());
+
+    expect(screen.queryByText(/groups of/)).not.toBeInTheDocument();
+  });
+});
+
+describe('QuestionCard sound effects', () => {
+  beforeEach(() => {
+    vi.mocked(playSound).mockClear();
+  });
+
+  it('plays a flip sound and a chime for a correct answer when turned on', async () => {
+    const { user } = renderCard({ soundEffects: true });
+
+    await user.click(getChoice('56'));
+    await user.click(getFlipButton());
+    expect(playSound).toHaveBeenLastCalledWith('flip');
+
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }));
+    expect(playSound).toHaveBeenLastCalledWith('correct');
+  });
+
+  it('plays no sound for "I Got It Wrong"', async () => {
+    const { user } = renderCard({ soundEffects: true });
+
+    await user.click(getChoice('54'));
+    await user.click(getFlipButton());
+    await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }));
+
+    expect(playSound).toHaveBeenCalledTimes(1);
+    expect(playSound).toHaveBeenCalledWith('flip');
+  });
+
+  it('is silent by default', async () => {
+    const { user } = renderCard();
+
+    await user.click(getChoice('56'));
+    await user.click(getFlipButton());
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }));
+
+    expect(playSound).not.toHaveBeenCalled();
   });
 });
