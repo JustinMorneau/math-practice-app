@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   soundEffectsEnabled: false,
   cardAnimationsEnabled: true,
   showExplanations: true,
+  feedbackMessagesEnabled: true,
   defaultSessionLength: 10,
   defaultDifficulty: 1,
   defaultOperations: ['addition'],

@@ -6,8 +6,9 @@ import { Button, ButtonLink } from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
 import PageContainer from '../components/layout/PageContainer';
 import ProgressBar from '../components/practice/ProgressBar';
-import QuestionCard from '../components/practice/QuestionCard';
+import QuestionCard, { type CardResult } from '../components/practice/QuestionCard';
 import { usePracticeSession } from '../hooks/usePracticeSession';
+import { pickFeedback } from '../services/feedbackMessages';
 import { getActivePatterns } from '../services/mistakeReview';
 import { loadMistakePatterns } from '../services/mistakeStorage';
 import type { PracticeConfig } from '../types';
@@ -52,6 +53,7 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
   const practice = usePracticeSession(config);
   const { session, attempts, currentQuestion, isActive, questionNumber, totalQuestions } = practice;
   const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   // When the session ends, show its summary. Replacing this history entry
   // means the browser's Back button won't return to a finished session.
@@ -69,6 +71,13 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
     return null;
   }
 
+  function handleResult(result: CardResult) {
+    if (settings.feedbackMessagesEnabled) {
+      setFeedback(pickFeedback(result.selfReportedCorrect, feedback));
+    }
+    practice.recordResult(result);
+  }
+
   function handleEndClick() {
     // Nothing would be lost yet, so there is no need to confirm.
     if (session.attempted === 0) {
@@ -81,7 +90,7 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
   return (
     <PageContainer title="Practice" showTitle={false}>
       <h1 className="visually-hidden">Practice</h1>
-      <p className={styles.details}>{formatPracticeSetup(config)}</p>
+      <p className={`${styles.details} ${styles.setup}`}>{formatPracticeSetup(config)}</p>
 
       {totalQuestions === null ? (
         <p className={styles.details}>{session.attempted} answered so far</p>
@@ -94,12 +103,18 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
         />
       )}
 
+      {settings.feedbackMessagesEnabled ? (
+        <p role="status" aria-label="Feedback" className={styles.feedback}>
+          {feedback}
+        </p>
+      ) : null}
+
       <QuestionCard
         key={currentQuestion.id}
         question={currentQuestion}
         questionNumber={questionNumber}
         totalQuestions={totalQuestions}
-        onResult={practice.recordResult}
+        onResult={handleResult}
         animated={settings.cardAnimationsEnabled}
         showExplanation={settings.showExplanations}
         soundEffects={settings.soundEffectsEnabled}

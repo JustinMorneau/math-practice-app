@@ -9,6 +9,7 @@ const customSettings: AppSettings = {
   soundEffectsEnabled: true,
   cardAnimationsEnabled: false,
   showExplanations: false,
+  feedbackMessagesEnabled: false,
   defaultSessionLength: 'continuous',
   defaultDifficulty: 3,
   defaultOperations: ['multiplication', 'division'],
@@ -64,6 +65,13 @@ describe('parseSettings', () => {
       ...customSettings,
       defaultSessionLength: DEFAULT_SETTINGS.defaultSessionLength,
     });
+  });
+
+  it('turns encouraging messages on for settings saved before that option existed', () => {
+    const olderSettings: Partial<AppSettings> = { ...customSettings };
+    delete olderSettings.feedbackMessagesEnabled;
+
+    expect(parseSettings(olderSettings)?.feedbackMessagesEnabled).toBe(true);
   });
 
   it('fills in settings missing from older saved data', () => {

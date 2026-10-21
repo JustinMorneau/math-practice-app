@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../constants/defaultSettings';
+import { POSITIVE_FEEDBACK, SUPPORTIVE_FEEDBACK } from '../services/feedbackMessages';
 import { saveSettings } from '../services/settingsStorage';
 import { createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
@@ -163,6 +164,33 @@ describe('PracticePage: card settings', () => {
     await user.click(screen.getByRole('button', { name: 'Flip Card' }));
 
     expect(screen.queryByText(/ because /)).not.toBeInTheDocument();
+  });
+});
+
+describe('PracticePage: encouraging messages', () => {
+  function getFeedback() {
+    return screen.getByRole('status', { name: 'Feedback' });
+  }
+
+  it('praises a correct answer and supports a missed one', async () => {
+    const user = renderPracticeWithState(fiveQuestions);
+    expect(getFeedback()).toBeEmptyDOMElement();
+
+    await answerCard(user, true);
+    expect(POSITIVE_FEEDBACK).toContain(getFeedback().textContent);
+
+    await answerCard(user, false);
+    expect(SUPPORTIVE_FEEDBACK).toContain(getFeedback().textContent);
+  });
+
+  it('shows no messages when the setting is off', async () => {
+    const storage = createStorageService(new MemoryStorage());
+    saveSettings({ ...DEFAULT_SETTINGS, feedbackMessagesEnabled: false }, storage);
+    renderAppAt('/practice/session', { state: fiveQuestions, storage });
+
+    await answerCard(userEvent.setup(), true);
+
+    expect(screen.queryByRole('status', { name: 'Feedback' })).not.toBeInTheDocument();
   });
 });
 

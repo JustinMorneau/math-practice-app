@@ -9,6 +9,8 @@ export interface AppSettings {
   /** When false, cards switch sides instantly instead of animating. */
   cardAnimationsEnabled: boolean;
   showExplanations: boolean;
+  /** Show a short encouraging message after each answer. */
+  feedbackMessagesEnabled: boolean;
   defaultSessionLength: SessionLength;
   defaultDifficulty: DifficultyLevel;
   defaultOperations: MathOperation[];

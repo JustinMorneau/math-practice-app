@@ -101,6 +101,12 @@ function SettingsPage() {
             onChange={(showExplanations) => save({ showExplanations })}
           />
           <ToggleSwitch
+            label="Encouraging messages"
+            description='Show a short message like "Nice work!" after each answer.'
+            checked={settings.feedbackMessagesEnabled}
+            onChange={(feedbackMessagesEnabled) => save({ feedbackMessagesEnabled })}
+          />
+          <ToggleSwitch
             label="Sound effects"
             description="Play a soft sound when a card flips and when you get it right."
             checked={settings.soundEffectsEnabled}

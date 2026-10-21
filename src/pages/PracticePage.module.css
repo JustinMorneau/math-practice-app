@@ -5,6 +5,24 @@
   text-align: center;
 }
 
+/* Encouraging message after each answer. Its height is reserved, so the
+   card does not move when a message appears. */
+.feedback {
+  min-height: 1.5em;
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Short screens (phones in landscape): the feedback line takes the place of
+   the setup description, which the student chose themselves. */
+@media (max-height: 30rem) {
+  .setup {
+    display: none;
+  }
+}
+
 .footer {
   display: flex;
   justify-content: center;

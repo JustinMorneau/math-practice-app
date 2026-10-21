@@ -19,6 +19,7 @@ const SETTING_VALIDATORS: { [K in keyof AppSettings]: (value: unknown) => boolea
   soundEffectsEnabled: (value) => typeof value === 'boolean',
   cardAnimationsEnabled: (value) => typeof value === 'boolean',
   showExplanations: (value) => typeof value === 'boolean',
+  feedbackMessagesEnabled: (value) => typeof value === 'boolean',
   // Only lengths the setup page offers, so a default always matches a choice.
   defaultSessionLength: (value) => SESSION_LENGTH_OPTIONS.some((option) => option.value === value),
   defaultDifficulty: isDifficultyLevel,

@@ -32,6 +32,7 @@ describe('SettingsPage', () => {
     ).toBeChecked();
     expect(screen.getByRole('switch', { name: 'Card animation' })).toBeChecked();
     expect(screen.getByRole('switch', { name: 'Show explanations' })).not.toBeChecked();
+    expect(screen.getByRole('switch', { name: 'Encouraging messages' })).toBeChecked();
     expect(screen.getByRole('switch', { name: 'Sound effects' })).not.toBeChecked();
     expect(
       getGroup('Questions to master a mistake').getByRole('radio', { name: '3 questions' }),
@@ -49,6 +50,7 @@ describe('SettingsPage', () => {
     );
     await user.click(screen.getByRole('switch', { name: 'Card animation' }));
     await user.click(screen.getByRole('switch', { name: 'Show explanations' }));
+    await user.click(screen.getByRole('switch', { name: 'Encouraging messages' }));
     await user.click(screen.getByRole('switch', { name: 'Sound effects' }));
     await user.click(
       getGroup('Questions to master a mistake').getByRole('radio', { name: '5 questions' }),
@@ -58,6 +60,7 @@ describe('SettingsPage', () => {
       soundEffectsEnabled: true,
       cardAnimationsEnabled: false,
       showExplanations: false,
+      feedbackMessagesEnabled: false,
       defaultSessionLength: 'continuous',
       defaultDifficulty: 4,
       defaultOperations: ['addition', 'division'],
