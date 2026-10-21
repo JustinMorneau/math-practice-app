@@ -7,11 +7,7 @@ import { DEFAULT_MASTERY_THRESHOLD } from '../constants/defaultSettings';
 import type { PracticeAttempt } from '../types';
 import { createId } from '../utils/ids';
 import { loadAttempts, saveAttempt } from './historyStorage';
-import {
-  limitMistakePatterns,
-  recordIncorrectAnswer,
-  recordReviewAnswer,
-} from './mistakePatterns';
+import { limitMistakePatterns, recordIncorrectAnswer, recordReviewAnswer } from './mistakePatterns';
 import { loadMistakePatterns, saveMistakePatterns } from './mistakeStorage';
 import { addAttemptToStatistics } from './statisticsService';
 import { loadStatistics, saveStatistics } from './statisticsStorage';

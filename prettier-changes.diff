@@ -1,21 +1,25 @@
-commit a46bcb9bbaaf7d73457fc61ed248a7c5d08f8e19
+commit 5d2d6d7f8daa86ce83e9a705b65f0370211c1055
 Author: Claude <noreply@anthropic.com>
-Date:   Wed Oct 21 17:59:53 2026 -0400
+Date:   Wed Oct 21 18:22:19 2026 -0400
 
     style: apply Prettier formatting
 
-diff --git a/src/components/practice/CardBack.tsx b/src/components/practice/CardBack.tsx
-index ee86d12..4783a0e 100644
---- a/src/components/practice/CardBack.tsx
-+++ b/src/components/practice/CardBack.tsx
-@@ -42,9 +42,7 @@ function CardBack({
-       <h2 ref={headingRef} tabIndex={-1} className={`${styles.problem} ${styles.answerProblem}`}>
-         {question.displayText} = {question.correctAnswer}
-       </h2>
--      {showExplanation ? (
--        <p className={styles.explanation}>{getExplanation(question)}</p>
--      ) : null}
-+      {showExplanation ? <p className={styles.explanation}>{getExplanation(question)}</p> : null}
-       <p className={styles.yourAnswer}>
-         Your answer: <strong>{selectedAnswer}</strong>
-       </p>
+diff --git a/src/services/similarQuestions.test.ts b/src/services/similarQuestions.test.ts
+index ffce26a..b15eef6 100644
+--- a/src/services/similarQuestions.test.ts
++++ b/src/services/similarQuestions.test.ts
+@@ -142,9 +142,11 @@ describe('getFactFamilyProblems', () => {
+ 
+ describe('getSimilarProblems', () => {
+   it("matches the specification's example for 8 × 7", () => {
+-    const { nearby, reversed, 'fact-family': factFamily } = getSimilarProblems(
+-      pattern('multiplication', 8, 7),
+-    );
++    const {
++      nearby,
++      reversed,
++      'fact-family': factFamily,
++    } = getSimilarProblems(pattern('multiplication', 8, 7));
+     const all = texts([...nearby, ...reversed, ...factFamily]);
+ 
+     for (const example of ['7 × 8', '8 × 6', '9 × 7', '56 ÷ 7', '56 ÷ 8']) {
