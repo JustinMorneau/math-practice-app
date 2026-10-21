@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { PracticeConfig } from '../types';
+import type { PracticeConfig, PracticeSession } from '../types';
 import {
   isDifficultyLevel,
   isMathOperation,
   isPracticeConfig,
+  isPracticeSession,
   isSessionLength,
 } from './validation';
 
@@ -64,5 +65,39 @@ describe('isPracticeConfig', () => {
     ['a missing field', { operations: ['addition'], difficulty: 1 }],
   ])('rejects %s', (_description, value) => {
     expect(isPracticeConfig(value)).toBe(false);
+  });
+});
+
+describe('isPracticeSession', () => {
+  const session: PracticeSession = {
+    id: 's-1',
+    startedAt: '2026-10-21T10:00:00.000Z',
+    completedAt: '2026-10-21T10:05:00.000Z',
+    operations: ['multiplication'],
+    difficulty: 2,
+    sessionLength: 10,
+    attempted: 10,
+    correct: 7,
+    incorrect: 3,
+  };
+
+  it('accepts a complete session', () => {
+    expect(isPracticeSession(session)).toBe(true);
+  });
+
+  it('accepts a session that has not finished', () => {
+    expect(isPracticeSession({ ...session, completedAt: undefined })).toBe(true);
+  });
+
+  it.each([
+    ['null', null],
+    ['a missing id', { ...session, id: undefined }],
+    ['totals that do not add up', { ...session, correct: 8 }],
+    ['a negative count', { ...session, attempted: -1, correct: -1, incorrect: 0 }],
+    ['a fractional count', { ...session, attempted: 9.5, correct: 6.5 }],
+    ['an invalid setup', { ...session, operations: [] }],
+    ['a non-string completion time', { ...session, completedAt: 5 }],
+  ])('rejects %s', (_description, value) => {
+    expect(isPracticeSession(value)).toBe(false);
   });
 });

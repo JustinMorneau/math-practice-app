@@ -33,6 +33,11 @@ async function answerCard(user: User, gotItRight = true) {
   );
 }
 
+/** The value shown under a summary stat label, e.g. "60%" for "Accuracy". */
+function getStat(label: string) {
+  return screen.getByText(label, { selector: 'dt' }).nextElementSibling?.textContent;
+}
+
 function getProgressBar() {
   return screen.getByRole('progressbar', { name: 'Session progress' });
 }
@@ -60,22 +65,19 @@ describe('PracticePage: fixed-length sessions', () => {
     expect(screen.getByRole('heading', { level: 2, name: /= \?$/ })).toHaveFocus();
   });
 
-  it('finishes after the last question and shows the totals', async () => {
+  it('shows the summary after the last question', async () => {
     const user = renderPracticeWithState(fiveQuestions);
 
     for (const gotItRight of [true, false, true, true, false]) {
       await answerCard(user, gotItRight);
     }
 
-    expect(screen.getByRole('heading', { name: 'Session complete!' })).toHaveFocus();
-    expect(
-      screen.getByText('You answered 5 questions: 3 right and 2 to keep practicing.'),
-    ).toBeInTheDocument();
-    expect(getProgressBar()).toHaveAttribute('aria-valuenow', '5');
+    expect(screen.getByRole('heading', { level: 1, name: 'Session Summary' })).toBeInTheDocument();
+    expect(getStat('Accuracy')).toBe('60%');
     expect(screen.queryByRole('group', { name: 'Answer choices' })).not.toBeInTheDocument();
   });
 
-  it('starts a fresh session with Practice Again', async () => {
+  it('starts a fresh session from the summary with Practice Again', async () => {
     const user = renderPracticeWithState(fiveQuestions);
     for (let i = 0; i < 5; i += 1) {
       await answerCard(user);
@@ -115,10 +117,8 @@ describe('PracticePage: continuous practice', () => {
     expect(prompt).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Yes, End Session' }));
 
-    expect(screen.getByRole('heading', { name: 'Session complete!' })).toBeInTheDocument();
-    expect(
-      screen.getByText('You answered 2 questions: 1 right and 1 to keep practicing.'),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Session Summary' })).toBeInTheDocument();
+    expect(getStat('Answered')).toBe('2');
   });
 
   it('keeps practicing when the student changes their mind', async () => {

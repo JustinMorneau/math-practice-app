@@ -28,6 +28,7 @@ export interface PracticeSessionState {
 }
 
 export type PracticeSessionAction =
+  /** `nextQuestion` is ignored when this attempt completes the session. */
   | { type: 'record-attempt'; attempt: PracticeAttempt; nextQuestion: Question }
   | { type: 'end-session'; completedAt: string };
 

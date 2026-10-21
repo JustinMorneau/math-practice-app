@@ -8,12 +8,16 @@ import OperationSelector from '../components/setup/OperationSelector';
 import SessionLengthSelector from '../components/setup/SessionLengthSelector';
 import { DEFAULT_PRACTICE_CONFIG } from '../constants/practiceOptions';
 import type { PracticeConfig } from '../types';
+import { isPracticeConfig } from '../utils/validation';
 import styles from './PracticeSetupPage.module.css';
 
 /**
  * Lets the student choose operations, difficulty, and session length, then
- * starts a session. The chosen PracticeConfig is passed to the practice page
- * as router state; later phases move it into app-wide state and storage.
+ * starts a session by passing the chosen PracticeConfig to the practice page
+ * as router state.
+ *
+ * Opens with the previous choices when router state carries a `config` (as
+ * when returning from a session summary), and with the defaults otherwise.
  */
 function PracticeSetupPage() {
   const navigate = useNavigate();
@@ -21,7 +25,11 @@ function PracticeSetupPage() {
   const messageId = useId();
   const setupState = location.state as PracticeSetupState | null;
   const showMissingSessionNotice = setupState?.notice === 'session-missing';
-  const [config, setConfig] = useState<PracticeConfig>(DEFAULT_PRACTICE_CONFIG);
+  // Start from the previous session's choices when returning from a summary.
+  const previousConfig = setupState?.config;
+  const [config, setConfig] = useState<PracticeConfig>(() =>
+    isPracticeConfig(previousConfig) ? previousConfig : DEFAULT_PRACTICE_CONFIG,
+  );
 
   // A difficulty and session length are always selected, so only the
   // operations can be missing.

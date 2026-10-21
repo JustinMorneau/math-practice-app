@@ -1,3 +1,5 @@
+import type { PracticeConfig, PracticeSession } from '../types';
+
 /**
  * Every route path in one place (specification section 16), so links and
  * the route table cannot drift apart.
@@ -18,4 +20,13 @@ export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 export interface PracticeSetupState {
   /** Set when the student was sent back because no valid session was found. */
   notice?: 'session-missing';
+  /** Choices to start from, such as the setup of the session just finished. */
+  config?: PracticeConfig;
+}
+
+/** Router state the session summary page expects. */
+export interface SessionSummaryState {
+  session: PracticeSession;
+  /** How many of the session's questions were mistake-review questions. */
+  reviewQuestionCount: number;
 }

@@ -1,0 +1,87 @@
+.celebration {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.headline {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.message {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--color-ink-soft);
+}
+
+/* Four chunky stat tiles: 2 × 2 on phones, one row on wider screens */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding-bottom: var(--block-depth);
+}
+
+@media (min-width: 40rem) {
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-chunky);
+  border-radius: var(--radius-block);
+  box-shadow: 0 var(--block-depth) 0 var(--color-ink);
+}
+
+.stat dt {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.stat dd {
+  margin: 0;
+  font-size: clamp(2rem, 1.6rem + 1.5vw, 2.75rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.accuracy {
+  background: var(--color-sun-soft);
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.notes p {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Full-width, stacked buttons on phones */
+@media (max-width: 30rem) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

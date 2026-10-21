@@ -8,6 +8,7 @@ import {
   type DifficultyLevel,
   type MathOperation,
   type PracticeConfig,
+  type PracticeSession,
   type SessionLength,
 } from '../types';
 
@@ -39,5 +40,33 @@ export function isPracticeConfig(value: unknown): value is PracticeConfig {
     new Set(operations).size === operations.length &&
     isDifficultyLevel(difficulty) &&
     isSessionLength(sessionLength)
+  );
+}
+
+function isCount(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
+}
+
+/**
+ * A complete session record whose totals add up: correct + incorrect must
+ * equal attempted.
+ */
+export function isPracticeSession(value: unknown): value is PracticeSession {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  const { id, startedAt, completedAt, attempted, correct, incorrect, ...config } = record;
+
+  return (
+    typeof id === 'string' &&
+    typeof startedAt === 'string' &&
+    (completedAt === undefined || typeof completedAt === 'string') &&
+    isPracticeConfig(config) &&
+    isCount(attempted) &&
+    isCount(correct) &&
+    isCount(incorrect) &&
+    correct + incorrect === attempted
   );
 }

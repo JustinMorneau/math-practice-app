@@ -32,6 +32,11 @@ export function usePracticeSession(config: PracticeConfig) {
   );
 
   function recordResult({ selectedAnswer, selfReportedCorrect }: ReportedResult) {
+    // After the last question of a fixed-length session there is nothing to
+    // show next, so skip generating one.
+    const total = getTotalQuestions(state.session.sessionLength);
+    const isLastQuestion = total !== null && state.session.attempted + 1 >= total;
+
     dispatch({
       type: 'record-attempt',
       attempt: createAttempt({
@@ -42,7 +47,9 @@ export function usePracticeSession(config: PracticeConfig) {
         selfReportedCorrect,
         attemptedAt: new Date().toISOString(),
       }),
-      nextQuestion: generateNextQuestion(state.config, state.currentQuestion),
+      nextQuestion: isLastQuestion
+        ? state.currentQuestion
+        : generateNextQuestion(state.config, state.currentQuestion),
     });
   }
 

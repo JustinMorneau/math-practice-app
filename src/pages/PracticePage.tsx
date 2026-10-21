@@ -1,12 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
-import { ROUTES, type PracticeSetupState } from '../app/routes';
-import { Button, ButtonLink } from '../components/common/Button';
+import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../app/routes';
+import { Button } from '../components/common/Button';
 import PageContainer from '../components/layout/PageContainer';
 import ProgressBar from '../components/practice/ProgressBar';
 import QuestionCard from '../components/practice/QuestionCard';
 import { usePracticeSession } from '../hooks/usePracticeSession';
-import type { PracticeConfig, PracticeSession } from '../types';
+import type { PracticeConfig } from '../types';
 import { formatDifficulty, formatOperationList, formatQuestionCount } from '../utils/format';
 import { isPracticeConfig } from '../utils/validation';
 import styles from './PracticePage.module.css';
@@ -17,34 +17,38 @@ import styles from './PracticePage.module.css';
  * student is sent to the setup page with a short explanation.
  */
 function PracticePage() {
-  const { state } = useLocation();
-  const [round, setRound] = useState(0);
+  const location = useLocation();
 
-  if (!isPracticeConfig(state)) {
+  if (!isPracticeConfig(location.state)) {
     const setupState: PracticeSetupState = { notice: 'session-missing' };
     return <Navigate to={ROUTES.practiceSetup} replace state={setupState} />;
   }
 
-  // A new key remounts the session, which starts a fresh one with the same setup.
-  return (
-    <PracticeSessionView
-      key={round}
-      config={state}
-      onPracticeAgain={() => setRound((current) => current + 1)}
-    />
-  );
+  // Keyed by the history entry, so every navigation here starts a fresh session.
+  return <PracticeSessionView key={location.key} config={location.state} />;
 }
 
-interface PracticeSessionViewProps {
-  config: PracticeConfig;
-  onPracticeAgain: () => void;
-}
-
-function PracticeSessionView({ config, onPracticeAgain }: PracticeSessionViewProps) {
+function PracticeSessionView({ config }: { config: PracticeConfig }) {
   const navigate = useNavigate();
-  const { session, currentQuestion, isActive, questionNumber, totalQuestions, ...actions } =
-    usePracticeSession(config);
+  const practice = usePracticeSession(config);
+  const { session, attempts, currentQuestion, isActive, questionNumber, totalQuestions } = practice;
   const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
+
+  // When the session ends, show its summary. Replacing this history entry
+  // means the browser's Back button won't return to a finished session.
+  useEffect(() => {
+    if (!isActive) {
+      const summaryState: SessionSummaryState = {
+        session,
+        reviewQuestionCount: attempts.filter(({ source }) => source === 'mistake-review').length,
+      };
+      navigate(ROUTES.practiceSummary, { replace: true, state: summaryState });
+    }
+  }, [isActive, navigate, session, attempts]);
+
+  if (!isActive) {
+    return null;
+  }
 
   function handleEndClick() {
     // Nothing would be lost yet, so there is no need to confirm.
@@ -53,11 +57,6 @@ function PracticeSessionView({ config, onPracticeAgain }: PracticeSessionViewPro
       return;
     }
     setIsConfirmingEnd(true);
-  }
-
-  function handleConfirmEnd() {
-    setIsConfirmingEnd(false);
-    actions.endSession();
   }
 
   return (
@@ -78,33 +77,28 @@ function PracticeSessionView({ config, onPracticeAgain }: PracticeSessionViewPro
         />
       )}
 
-      {isActive ? (
-        <>
-          <QuestionCard
-            key={currentQuestion.id}
-            question={currentQuestion}
-            questionNumber={questionNumber}
-            totalQuestions={totalQuestions}
-            onResult={actions.recordResult}
-            focusOnMount={questionNumber > 1}
+      <QuestionCard
+        key={currentQuestion.id}
+        question={currentQuestion}
+        questionNumber={questionNumber}
+        totalQuestions={totalQuestions}
+        onResult={practice.recordResult}
+        focusOnMount={questionNumber > 1}
+      />
+
+      <div className={styles.footer}>
+        {isConfirmingEnd ? (
+          <EndSessionConfirmation
+            answered={session.attempted}
+            onConfirm={practice.endSession}
+            onCancel={() => setIsConfirmingEnd(false)}
           />
-          <div className={styles.footer}>
-            {isConfirmingEnd ? (
-              <EndSessionConfirmation
-                answered={session.attempted}
-                onConfirm={handleConfirmEnd}
-                onCancel={() => setIsConfirmingEnd(false)}
-              />
-            ) : (
-              <Button variant="secondary" onClick={handleEndClick}>
-                End Session
-              </Button>
-            )}
-          </div>
-        </>
-      ) : (
-        <SessionComplete session={session} onPracticeAgain={onPracticeAgain} />
-      )}
+        ) : (
+          <Button variant="secondary" onClick={handleEndClick}>
+            End Session
+          </Button>
+        )}
+      </div>
     </PageContainer>
   );
 }
@@ -137,39 +131,6 @@ function EndSessionConfirmation({ answered, onConfirm, onCancel }: EndSessionCon
         </Button>
       </div>
     </div>
-  );
-}
-
-interface SessionCompleteProps {
-  session: PracticeSession;
-  onPracticeAgain: () => void;
-}
-
-/** Shown when the session ends. Phase 8 replaces this with the full summary page. */
-function SessionComplete({ session, onPracticeAgain }: SessionCompleteProps) {
-  const headingId = useId();
-  const headingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    headingRef.current?.focus();
-  }, []);
-
-  return (
-    <section className={styles.complete} aria-labelledby={headingId}>
-      <h2 id={headingId} ref={headingRef} tabIndex={-1}>
-        Session complete!
-      </h2>
-      <p className={styles.completeTotals}>
-        {`You answered ${formatQuestionCount(session.attempted)}: ${session.correct} right ` +
-          `and ${session.incorrect} to keep practicing.`}
-      </p>
-      <div className={styles.confirmActions}>
-        <Button onClick={onPracticeAgain}>Practice Again</Button>
-        <ButtonLink to={ROUTES.practiceSetup} variant="secondary">
-          Change Setup
-        </ButtonLink>
-      </div>
-    </section>
   );
 }
 
