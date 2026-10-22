@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router';
 import AppProvider from '../app/AppProvider';
-import AppRoutes from '../app/AppRoutes';
+import { appRoutes } from '../app/routeTable';
 import type { StorageService } from '../services/storageService';
 
 interface RenderAppOptions {
@@ -12,15 +12,19 @@ interface RenderAppOptions {
   storage?: StorageService;
 }
 
-/** Render the full app (provider and route table), starting at the given URL path. */
+/**
+ * Render the full app (provider and routes), starting at the given URL path.
+ * The starting page always has the history key "default", as after a browser
+ * refresh, so rendering the same path again simulates reloading the page.
+ */
 export function renderAppAt(path: string, { state, storage }: RenderAppOptions = {}) {
-  return render(
+  const router = createMemoryRouter(appRoutes, { initialEntries: [{ pathname: path, state }] });
+  const result = render(
     <AppProvider storage={storage}>
-      <MemoryRouter initialEntries={[{ pathname: path, state }]}>
-        <AppRoutes />
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </AppProvider>,
   );
+  return { ...result, router };
 }
 
 /** Render a single component that uses router hooks or links. */

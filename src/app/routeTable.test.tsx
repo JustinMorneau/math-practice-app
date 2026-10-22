@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { renderAppAt } from '../test/renderWithRouter';
 import { ROUTES } from './routes';
 
-describe('AppRoutes', () => {
+describe('app routes', () => {
   it.each([
     [ROUTES.home, 'Welcome to Math Practice!'],
     [ROUTES.practiceSetup, 'Practice Setup'],

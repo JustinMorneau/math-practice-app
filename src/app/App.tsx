@@ -1,14 +1,14 @@
-import { BrowserRouter } from 'react-router';
+import { RouterProvider, createBrowserRouter } from 'react-router';
 import AppProvider from './AppProvider';
-import AppRoutes from './AppRoutes';
+import { appRoutes } from './routeTable';
+
+const router = createBrowserRouter(appRoutes);
 
 /** Root component: shared app data, then routing. */
 function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </AppProvider>
   );
 }
