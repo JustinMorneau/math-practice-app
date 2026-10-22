@@ -856,12 +856,12 @@ Initial routes:
 
 ### 87. Complete Browser Testing
 
-- [ ] Test in Chrome.
-- [ ] Test in Safari.
-- [ ] Test in Firefox.
-- [ ] Test in Microsoft Edge.
-- [ ] Test on an iPad or tablet emulator.
-- [ ] Test on a mobile device or emulator.
+- [x] Test in Chrome.
+- [ ] Test in Safari. _(Needs an iPhone, iPad, or Mac.)_
+- [x] Test in Firefox.
+- [x] Test in Microsoft Edge.
+- [ ] Test on an iPad or tablet emulator. _(Chrome's device toolbar can emulate an iPad.)_
+- [x] Test on a mobile device or emulator. _(Tested on a phone.)_
 
 ### 88. Prepare the Production Build
 
@@ -869,17 +869,17 @@ Initial routes:
 - [x] Resolve linting errors.
 - [x] Resolve TypeScript errors.
 - [x] Create the production build.
-- [ ] Test the production build locally.
+- [x] Test the production build locally. _(The production build was tested on the deployed site.)_
 - [x] Configure deployment routing for React Router. _(netlify.toml serves index.html for every path.)_
 
 ### 89. Deploy the Application
 
 - [x] Select a hosting service. _(Netlify, free plan.)_
-- [ ] Deploy the production build.
-- [ ] Verify every route.
-- [ ] Verify local-storage persistence.
-- [ ] Verify responsive behavior.
-- [ ] Verify that no development errors appear in the console.
+- [x] Deploy the production build. _(Netlify, deployed from GitHub on every push to main.)_
+- [x] Verify every route. _(Each route loads directly and after a refresh.)_
+- [x] Verify local-storage persistence.
+- [x] Verify responsive behavior. _(Checked on a phone.)_
+- [ ] Verify that no development errors appear in the console. _(The app logs no errors. Netlify's review toolbar (Netlify Drawer) was blocked by the Content Security Policy; it has been turned off, and the console should be clean after the next deploy.)_
 
 ---
 
