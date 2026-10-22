@@ -37,15 +37,18 @@ describe('Navigation', () => {
 });
 
 describe('Navigation menu on narrow screens', () => {
-  // The Menu button is shown only on narrow screens; the test environment is
-  // wide, so it is found with `hidden: true` and clicked directly.
+  // The Menu button is shown only on narrow screens. The test environment is
+  // wide, so the button is hidden by CSS: it is found with `hidden: true` and
+  // clicked directly. A hidden element's text is left out of its accessible
+  // name, so it is found as the navigation's only button, not by name.
   function getMenuButton() {
-    return within(getMainNav()).getByRole('button', { name: 'Menu', hidden: true });
+    return within(getMainNav()).getByRole('button', { hidden: true });
   }
 
   it('reports whether the menu is open and which list it controls', () => {
     renderAppAt('/');
     const menuButton = getMenuButton();
+    expect(menuButton).toHaveTextContent('Menu');
     expect(menuButton).toHaveAttribute('aria-expanded', 'false');
     expect(menuButton).toHaveAttribute('aria-controls', within(getMainNav()).getByRole('list').id);
 
