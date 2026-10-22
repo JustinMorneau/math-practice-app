@@ -2,7 +2,9 @@ import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router';
 import AppProvider from '../app/AppProvider';
-import { appRoutes } from '../app/routeTable';
+import { createAppRoutes } from '../app/routeTable';
+import SettingsPage from '../pages/SettingsPage';
+import StatisticsPage from '../pages/StatisticsPage';
 import type { StorageService } from '../services/storageService';
 
 interface RenderAppOptions {
@@ -11,6 +13,12 @@ interface RenderAppOptions {
   /** Storage for the app to use; defaults to the test environment's localStorage. */
   storage?: StorageService;
 }
+
+/** The app's routes with every page loaded up front, so tests render synchronously. */
+const appRoutes = createAppRoutes({
+  statistics: { element: <StatisticsPage /> },
+  settings: { element: <SettingsPage /> },
+});
 
 /**
  * Render the full app (provider and routes), starting at the given URL path.
