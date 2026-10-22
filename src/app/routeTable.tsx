@@ -1,4 +1,4 @@
-import { Navigate, Route, createRoutesFromElements, type NonIndexRouteObject } from 'react-router';
+import { Navigate, Route, createRoutesFromElements, type PathRouteProps } from 'react-router';
 import AppLayout from '../components/layout/AppLayout';
 import ErrorPage from '../pages/ErrorPage';
 import HomePage from '../pages/HomePage';
@@ -9,8 +9,12 @@ import PracticeSetupPage from '../pages/PracticeSetupPage';
 import SessionSummaryPage from '../pages/SessionSummaryPage';
 import { ROUTES } from './routes';
 
-/** How a page's route provides it: right away (`element`) or on first visit (`lazy`). */
-export type PageRoute = Pick<NonIndexRouteObject, 'element' | 'lazy'>;
+/**
+ * How a page's route provides it: right away (`element`) or on first visit
+ * (`lazy`). Typed from the <Route> component's own props, since these are
+ * spread onto <Route>.
+ */
+export type PageRoute = Pick<PathRouteProps, 'element' | 'lazy'>;
 
 export interface LazyPages {
   statistics: PageRoute;
