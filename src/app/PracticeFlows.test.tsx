@@ -54,25 +54,30 @@ describe('a full addition session', () => {
 });
 
 describe('a mixed-operation session', () => {
-  it('mixes the selected operations', async () => {
+  // Simulated clicks are slow, so this longer flow gets more than the
+  // default five seconds.
+  it('mixes the selected operations', { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     const storage = createStorageService(new MemoryStorage());
     renderAppAt('/practice/setup', { storage });
 
     await user.click(screen.getByRole('button', { name: 'Select all' }));
-    await user.click(screen.getByRole('radio', { name: '20 questions' }));
+    await user.click(screen.getByRole('radio', { name: 'Keep going' }));
     await user.click(screen.getByRole('button', { name: 'Start Session' }));
     expect(
       screen.getByText('Addition, Subtraction, Multiplication, and Division, Beginner level'),
     ).toBeInTheDocument();
 
-    for (let i = 0; i < 20; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
       await answerCard(user, true);
     }
+    await user.click(screen.getByRole('button', { name: 'End Session' }));
+    await user.click(screen.getByRole('button', { name: 'Yes, End Session' }));
 
-    // With four operations chosen at random, twenty questions use several of them.
+    // Eight questions chosen at random from four operations all match only
+    // about once in 16,000 runs, so several operations appear.
     const operations = new Set(loadAttempts(storage).map(({ operation }) => operation));
     expect(operations.size).toBeGreaterThan(1);
-    expect(getStat('Answered')).toBe('20');
+    expect(getStat('Answered')).toBe('8');
   });
 });

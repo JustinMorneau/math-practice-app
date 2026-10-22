@@ -220,7 +220,9 @@ describe('Statistics after practicing', () => {
     await user.click(within(choices).getAllByRole('button')[0]);
     await user.click(screen.getByRole('button', { name: 'Flip Card' }));
     await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }));
+    // Leaving mid-session asks first; ending the session keeps its answers.
     await user.click(screen.getByRole('link', { name: 'Statistics' }));
+    await user.click(screen.getByRole('button', { name: 'End Session and Leave' }));
 
     expect(statIn(getSection('Overall'), 'Answered')).toBe('1');
     expect(statIn(getSection('Overall'), 'To practice')).toBe('1');
