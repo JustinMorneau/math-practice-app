@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { MemoryStorage } from '../test/storage';
 import type { PracticeAttempt } from '../types';
 import { recordAttempt } from './attemptRecorder';
-import { loadAttempts, saveAttempt } from './historyStorage';
+import { MAX_STORED_ATTEMPTS, loadAttempts, saveAttempt, saveAttempts } from './historyStorage';
 import { loadMistakePatterns, saveMistakePatterns } from './mistakeStorage';
 import { loadStatistics } from './statisticsStorage';
 import { STORAGE_KEYS, createStorageService } from './storageService';
@@ -239,5 +239,39 @@ describe('recordAttempt: mistake review', () => {
     recordAttempt(reviewAttempt('a-1', true), storage);
 
     expect(findOriginal(storage)?.similarCorrectCount).toBe(1);
+  });
+});
+
+describe('recordAttempt with a large practice history', () => {
+  /** A full history of saved attempts, as after months of practice. */
+  function storageWithFullHistory() {
+    const browserStorage = new MemoryStorage();
+    const storage = createStorageService(browserStorage);
+    const history = Array.from({ length: MAX_STORED_ATTEMPTS }, (_, index) =>
+      makeAttempt(`old-${index}`, { selfReportedCorrect: index % 4 !== 0 }),
+    );
+    saveAttempts(history, storage);
+    return { browserStorage, storage };
+  }
+
+  it('keeps recording, removing the oldest details but keeping all-time totals', () => {
+    const { storage } = storageWithFullHistory();
+
+    recordAttempt(makeAttempt('newest'), storage);
+
+    const attempts = loadAttempts(storage);
+    expect(attempts).toHaveLength(MAX_STORED_ATTEMPTS);
+    expect(attempts[0].id).toBe('old-1');
+    expect(attempts.at(-1)?.id).toBe('newest');
+    expect(loadStatistics(storage).attempted).toBe(MAX_STORED_ATTEMPTS + 1);
+  });
+
+  it('keeps several thousand attempts compact', () => {
+    const { browserStorage } = storageWithFullHistory();
+
+    const stored = browserStorage.getItem(STORAGE_KEYS.attempts) ?? '';
+
+    // About 90 characters each, instead of over 300 as plain objects.
+    expect(stored.length / MAX_STORED_ATTEMPTS).toBeLessThan(120);
   });
 });

@@ -3,7 +3,7 @@
  * 20.3). Totals are stored separately from attempts, so trimming old
  * attempt records never shrinks the student's all-time totals.
  */
-import type { AppStatistics } from '../types';
+import type { AppStatistics, PracticeAttempt } from '../types';
 import { loadAttempts } from './historyStorage';
 import { calculateStatistics, createEmptyStatistics, parseStatistics } from './statisticsService';
 import { STORAGE_KEYS, appStorage, type StorageService, type WriteResult } from './storageService';
@@ -13,7 +13,11 @@ import { STORAGE_KEYS, appStorage, type StorageService, type WriteResult } from 
  * rebuilt from the stored attempts and saved again, so only the affected
  * section is replaced (specification section 17).
  */
-export function loadStatistics(storage: StorageService = appStorage): AppStatistics {
+export function loadStatistics(
+  storage: StorageService = appStorage,
+  /** Already-loaded attempts, to avoid reading them again if a rebuild is needed. */
+  attempts?: readonly PracticeAttempt[],
+): AppStatistics {
   const { status, value } = storage.read(STORAGE_KEYS.statistics, parseStatistics, null);
   if (status === 'ok' && value !== null) {
     return value;
@@ -22,7 +26,7 @@ export function loadStatistics(storage: StorageService = appStorage): AppStatist
     return createEmptyStatistics();
   }
 
-  const rebuilt = calculateStatistics(loadAttempts(storage));
+  const rebuilt = calculateStatistics(attempts ?? loadAttempts(storage));
   // Save the rebuilt totals, unless there is simply nothing recorded yet.
   if (status === 'invalid' || rebuilt.attempted > 0) {
     storage.write(STORAGE_KEYS.statistics, rebuilt);

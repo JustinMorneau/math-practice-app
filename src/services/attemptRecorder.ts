@@ -6,7 +6,7 @@
 import { DEFAULT_MASTERY_THRESHOLD } from '../constants/defaultSettings';
 import type { PracticeAttempt } from '../types';
 import { createId } from '../utils/ids';
-import { loadAttempts, saveAttempt } from './historyStorage';
+import { loadAttempts, saveAttempts } from './historyStorage';
 import { limitMistakePatterns, recordIncorrectAnswer, recordReviewAnswer } from './mistakePatterns';
 import { loadMistakePatterns, saveMistakePatterns } from './mistakeStorage';
 import { addAttemptToStatistics } from './statisticsService';
@@ -33,14 +33,17 @@ export function recordAttempt(
   storage: StorageService = appStorage,
   { masteryThreshold = DEFAULT_MASTERY_THRESHOLD }: RecordAttemptOptions = {},
 ): WriteResult {
-  if (loadAttempts(storage).some(({ id }) => id === attempt.id)) {
+  // The attempt list is read once and written once: it is the largest piece
+  // of saved data, so this keeps recording an answer fast.
+  const attempts = loadAttempts(storage);
+  if (attempts.some(({ id }) => id === attempt.id)) {
     return { ok: true };
   }
 
   // Load first: if statistics must be rebuilt from attempts, this attempt
   // must not be in the list yet, or it would be counted twice.
-  const statistics = loadStatistics(storage);
-  const saved = saveAttempt(attempt, storage);
+  const statistics = loadStatistics(storage, attempts);
+  const saved = saveAttempts([...attempts, attempt], storage);
   if (!saved.ok) {
     return saved;
   }
