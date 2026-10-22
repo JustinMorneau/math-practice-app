@@ -40,35 +40,77 @@ Policy so only the app's own files can load.
 
 ## Prerequisites
 
-- Node.js `22.18+` or `24.11+` (required by Vitest 5; Vite 7 also runs on these)
-- npm 10+
+| Tool    | Version                       | Check with      |
+| ------- | ----------------------------- | --------------- |
+| Node.js | 22.18 or later, or 24.11+     | `node -v`       |
+| npm     | 10 or later (comes with Node) | `npm -v`        |
+| Git     | Any recent version            | `git --version` |
 
-## Getting started
+Install Node.js from [nodejs.org](https://nodejs.org) (choose the **LTS**
+version). After installing, close and reopen your terminal so the `node` and
+`npm` commands are found.
+
+## Installing
+
+1. Get the code:
+
+   ```bash
+   git clone https://github.com/JustinMorneau/math-practice-app.git
+   cd math-practice-app
+   ```
+
+2. Install the dependencies listed in `package.json` (React, Vite, the test
+   tools, and so on). They are downloaded into `node_modules/`, which is not
+   committed:
+
+   ```bash
+   npm install
+   ```
+
+   Some versions of npm ask before running a package's setup script. If npm
+   reports that `esbuild` has an install script waiting for approval, allow
+   it; Vite needs it:
+
+   ```bash
+   npm install-scripts approve esbuild
+   ```
+
+## Running locally
+
+Start the development server:
 
 ```bash
-npm install
 npm run dev
 ```
 
-Then open the URL Vite prints (usually http://localhost:5173). To try the app
-on a tablet or phone on the same network, run `npm run dev -- --host` and open
-the "Network" address it prints.
+Open the address it prints (usually <http://localhost:5173>). The page
+reloads automatically when you save a file. Press `Ctrl+C` in the terminal to
+stop the server.
 
-## Scripts
+To try the app on a tablet or phone on the same Wi-Fi network:
 
-| Command                | What it does                                        |
-| ---------------------- | --------------------------------------------------- |
-| `npm run dev`          | Start the development server with hot reload        |
-| `npm run build`        | Type-check and create a production build in `dist/` |
-| `npm run preview`      | Serve the production build locally                  |
-| `npm run typecheck`    | Run the TypeScript compiler without emitting files  |
-| `npm run lint`         | Run ESLint (`lint:fix` to auto-fix)                 |
-| `npm run format`       | Format all files with Prettier                      |
-| `npm run format:check` | Check formatting without writing (useful in CI)     |
-| `npm test`             | Run the Vitest suite once                           |
-| `npm run test:watch`   | Run Vitest in watch mode                            |
+```bash
+npm run dev -- --host
+```
+
+Then open the "Network" address it prints on the other device.
+
+Progress is saved in each browser's local storage, separately for every
+address, so progress made on `localhost` does not appear on the deployed site.
 
 ## Testing
+
+Run the full check before committing or deploying:
+
+```bash
+npm test               # all tests, once
+npm run lint           # code quality rules
+npm run typecheck      # TypeScript errors
+npm run format:check   # formatting (fix with npm run format)
+```
+
+Use `npm run test:watch` while working; it reruns the affected tests on every
+save.
 
 Tests use Vitest with jsdom, React Testing Library, and axe-core. Test files
 live next to the code they test (`*.test.ts` / `*.test.tsx`) and cover:
@@ -125,16 +167,58 @@ in `src/app/routes.ts` and the route table in `src/app/routeTable.tsx`.
 When the data format changes, add a migration in
 `src/services/schemaMigrations.ts` and raise `CURRENT_SCHEMA_VERSION`.
 
-## Deployment
+## Building for deployment
 
-The app is a static site. `netlify.toml` configures Netlify:
+1. Create the production build:
 
-- **Build**: `npm run build`, publishing the `dist` folder, on Node 22.
-- **Routing**: every path is served `index.html`, so React Router can show the
-  right page after a refresh or when a link is opened directly.
+   ```bash
+   npm run build
+   ```
+
+   This type-checks the code, then writes an optimized, minified copy of the
+   app to `dist/`. Vite prints each file with its size.
+
+2. Try the production build locally before deploying:
+
+   ```bash
+   npm run preview
+   ```
+
+   Open the address it prints (usually <http://localhost:4173>). Check that
+   pages load, that refreshing on a page such as `/statistics` works, and that
+   the browser console (F12) shows no errors.
+
+3. Deploy the contents of `dist/`. Because it is a static site, any static
+   host works, as long as it serves `index.html` for paths that are not real
+   files (so React Router can show the right page after a refresh).
+
+## Deploying to Netlify
+
+`netlify.toml` already configures everything Netlify needs:
+
+- **Build**: runs `npm run build` on Node 22 and publishes `dist`.
+- **Routing**: serves `index.html` for every path.
 - **Headers**: a strict Content Security Policy and privacy headers for every
   page, and long-term caching for the hashed files in `/assets`.
 
-To deploy, connect the GitHub repository to a new Netlify site; it reads these
-settings automatically and redeploys on every push to `main`. Other static
-hosts work too, as long as they serve `index.html` for unknown paths.
+To set it up once:
+
+1. Push the repository to GitHub.
+2. In Netlify, add a new site and import an existing project from GitHub,
+   giving Netlify access to only this repository.
+3. Keep the build settings it reads from `netlify.toml` and deploy.
+4. Optionally, rename the site under its configuration to choose the
+   `*.netlify.app` address.
+
+After that, every push to `main` builds and deploys the site automatically.
+
+## Troubleshooting
+
+| Problem                                                      | Fix                                                                                       |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `npm: command not found`                                     | Install Node.js, then close and reopen the terminal.                                      |
+| `npm install` warns that esbuild's install script is waiting | Run `npm install-scripts approve esbuild`.                                                |
+| An error mentions an unsupported Node.js version             | Install Node.js 22.18 or later (`node -v` shows the current version).                     |
+| The dev server says the port is in use                       | Vite picks the next free port; use the address it prints.                                 |
+| Refreshing a page on the deployed site shows "Not found"     | The host must serve `index.html` for unknown paths (`netlify.toml` does this on Netlify). |
+| Saved progress is missing                                    | Progress is stored per browser and address; it does not move between devices or sites.    |
