@@ -848,11 +848,11 @@ Initial routes:
 
 ### 86. Complete Privacy Review
 
-- [ ] Confirm that no personal information is collected.
-- [ ] Confirm that practice data remains in the browser.
-- [ ] Remove unnecessary tracking services.
-- [ ] Avoid child-facing advertisements.
-- [ ] Explain that clearing browser data removes progress.
+- [x] Confirm that no personal information is collected. _(No forms ask for personal details; checked that the code makes no network requests.)_
+- [x] Confirm that practice data remains in the browser. _(Everything is saved in localStorage under mathPractice.* keys.)_
+- [x] Remove unnecessary tracking services. _(None were ever added; the Content Security Policy blocks third-party scripts.)_
+- [x] Avoid child-facing advertisements. _(No ads anywhere.)_
+- [x] Explain that clearing browser data removes progress. _(About your data on the Settings page, plus notes on the statistics page and in the README.)_
 
 ### 87. Complete Browser Testing
 
@@ -865,16 +865,16 @@ Initial routes:
 
 ### 88. Prepare the Production Build
 
-- [ ] Run all tests.
-- [ ] Resolve linting errors.
-- [ ] Resolve TypeScript errors.
-- [ ] Create the production build.
+- [x] Run all tests.
+- [x] Resolve linting errors.
+- [x] Resolve TypeScript errors.
+- [x] Create the production build.
 - [ ] Test the production build locally.
-- [ ] Configure deployment routing for React Router.
+- [x] Configure deployment routing for React Router. _(netlify.toml serves index.html for every path.)_
 
 ### 89. Deploy the Application
 
-- [ ] Select a hosting service.
+- [x] Select a hosting service. _(Netlify, free plan.)_
 - [ ] Deploy the production build.
 - [ ] Verify every route.
 - [ ] Verify local-storage persistence.
