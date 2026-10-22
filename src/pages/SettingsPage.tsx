@@ -138,6 +138,23 @@ function SettingsPage() {
         </SetupFieldset>
       </section>
 
+      <section aria-labelledby="privacy-heading" className={styles.section}>
+        <h2 id="privacy-heading">About your data</h2>
+        <ul className={styles.privacy}>
+          <li>
+            Math Practice does not ask for your name, email, or any other personal information.
+          </li>
+          <li>There are no accounts, ads, or tracking.</li>
+          <li>
+            Your progress is saved only in this browser on this device. It is never sent anywhere.
+          </li>
+          <li>
+            Clearing this browser's data, or using a different browser or device, starts with no
+            saved progress.
+          </li>
+        </ul>
+      </section>
+
       <section aria-labelledby="clear-heading" className={styles.section}>
         <h2 id="clear-heading">Clear all data</h2>
         <p>

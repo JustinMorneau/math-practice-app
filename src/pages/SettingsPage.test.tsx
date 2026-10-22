@@ -84,6 +84,18 @@ describe('SettingsPage', () => {
   });
 });
 
+describe('About your data', () => {
+  it('explains that no personal information is collected and progress stays in the browser', () => {
+    renderAppAt('/settings', { storage: createStorageService(new MemoryStorage()) });
+    const privacy = within(screen.getByRole('region', { name: 'About your data' }));
+
+    expect(privacy.getByText(/does not ask for your name, email/i)).toBeInTheDocument();
+    expect(privacy.getByText(/no accounts, ads, or tracking/i)).toBeInTheDocument();
+    expect(privacy.getByText(/saved only in this browser/i)).toBeInTheDocument();
+    expect(privacy.getByText(/clearing this browser's data/i)).toBeInTheDocument();
+  });
+});
+
 describe('Clearing all application data', () => {
   it('shows a strong warning before erasing anything', async () => {
     const { storage, user } = setup();
