@@ -1,5 +1,11 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { useAppData } from '../app/AppDataContext';
+import {
+  clearActiveSession,
+  loadActiveSession,
+  saveActiveSession,
+  type CardProgress,
+} from '../services/activeSessionStorage';
 import { recordAttempt } from '../services/attemptRecorder';
 import { saveSession } from '../services/historyStorage';
 import { generateReviewQuestion } from '../services/mistakeReview';
@@ -19,6 +25,15 @@ import { createId } from '../utils/ids';
 export interface ReportedResult {
   selectedAnswer: number;
   selfReportedCorrect: boolean;
+}
+
+const NO_CARD_PROGRESS: CardProgress = { selectedAnswer: null, isFlipped: false };
+
+/** Whether two setups describe the same session. */
+function isSameSetup(a: PracticeConfig, b: PracticeConfig): boolean {
+  const normalize = ({ operations, difficulty, sessionLength, mode }: PracticeConfig) =>
+    JSON.stringify([operations, difficulty, sessionLength, mode ?? 'regular']);
+  return normalize(a) === normalize(b);
 }
 
 /** How many recent questions a review session avoids repeating. */
@@ -69,22 +84,57 @@ function chooseNextQuestion(
  * Review sessions need at least one active mistake to start (the practice
  * page checks this), and end early once every mistake is mastered.
  *
+ * The session in progress, including the current card's selected answer,
+ * is also saved under `locationKey` (the browser history entry). A page
+ * refresh keeps the same entry, so the session is restored exactly where it
+ * was; starting practice again creates a new entry and a fresh session. The
+ * saved copy is cleared when the session ends.
+ *
  * Remount the component (for example with a new `key`) to start a fresh
  * session with the same setup.
  */
-export function usePracticeSession(config: PracticeConfig) {
+export function usePracticeSession(
+  config: PracticeConfig,
+  { locationKey }: { locationKey: string },
+) {
   const { storage, settings, reportStorageResult } = useAppData();
   const { masteryThreshold } = settings;
 
-  const [state, dispatch] = useReducer(practiceSessionReducer, config, (initialConfig) =>
-    createSessionState(initialConfig, {
+  // A session saved for this same history entry is one interrupted by a refresh.
+  const [restored] = useState(() => {
+    const record = loadActiveSession(storage);
+    const matches = record?.locationKey === locationKey && isSameSetup(record.state.config, config);
+    return matches ? record : null;
+  });
+
+  function createInitialState(initialConfig: PracticeConfig) {
+    if (restored) {
+      return restored.state;
+    }
+    const choiceContext = { attempts: [], storage, masteryThreshold };
+    return createSessionState(initialConfig, {
       id: createId('s'),
       startedAt: new Date().toISOString(),
       firstQuestion:
-        chooseNextQuestion(initialConfig, null, { attempts: [], storage, masteryThreshold }) ??
+        chooseNextQuestion(initialConfig, null, choiceContext) ??
         generateNextQuestion(initialConfig, null),
-    }),
+    });
+  }
+
+  const [state, dispatch] = useReducer(practiceSessionReducer, config, createInitialState);
+  const [cardProgress, setCardProgress] = useState<CardProgress>(
+    restored?.card ?? NO_CARD_PROGRESS,
   );
+
+  // Keep the saved copy of the session in progress up to date, and forget it
+  // once the session ends.
+  useEffect(() => {
+    if (state.status === 'active') {
+      reportStorageResult(saveActiveSession({ locationKey, state, card: cardProgress }, storage));
+    } else {
+      clearActiveSession(storage);
+    }
+  }, [state, cardProgress, locationKey, storage, reportStorageResult]);
 
   // Saving is idempotent, so effects running twice in development are harmless.
   useEffect(() => {
@@ -113,11 +163,24 @@ export function usePracticeSession(config: PracticeConfig) {
       ? state.currentQuestion
       : chooseNextQuestion(state.config, state.currentQuestion, context);
 
+    setCardProgress(NO_CARD_PROGRESS);
     dispatch({ type: 'record-attempt', attempt, nextQuestion });
   }
 
   function endSession() {
     dispatch({ type: 'end-session', completedAt: new Date().toISOString() });
+  }
+
+  /**
+   * Ends the session while leaving the practice page: it is saved as ended
+   * right away, since the page closes before effects would run.
+   */
+  function leaveSession() {
+    if (state.session.attempted > 0) {
+      const ended = { ...state.session, completedAt: new Date().toISOString() };
+      reportStorageResult(saveSession(ended, storage));
+    }
+    clearActiveSession(storage);
   }
 
   return {
@@ -128,7 +191,11 @@ export function usePracticeSession(config: PracticeConfig) {
     /** One-based number of the question being shown. */
     questionNumber: state.session.attempted + 1,
     totalQuestions: getTotalQuestions(state.session.sessionLength),
+    /** The current card's selected answer and flip state, as last saved. */
+    cardProgress,
+    updateCardProgress: setCardProgress,
     recordResult,
     endSession,
+    leaveSession,
   };
 }

@@ -31,8 +31,8 @@ export function loadStatistics(storage: StorageService = appStorage): AppStatist
 }
 
 /**
- * Erases practice history: attempts, sessions, statistics, and mistake
- * patterns. Settings are kept, since they are preferences rather than
+ * Erases practice history: attempts, sessions, statistics, mistake
+ * patterns, and any session in progress. Settings are kept, since they are preferences rather than
  * history; clearing everything is a separate action on the settings page.
  */
 export function clearPracticeHistory(storage: StorageService = appStorage): WriteResult {
@@ -41,6 +41,7 @@ export function clearPracticeHistory(storage: StorageService = appStorage): Writ
     storage.remove(STORAGE_KEYS.sessions),
     storage.remove(STORAGE_KEYS.statistics),
     storage.remove(STORAGE_KEYS.mistakePatterns),
+    storage.remove(STORAGE_KEYS.activeSession),
   ];
   return results.find((result) => !result.ok) ?? { ok: true };
 }

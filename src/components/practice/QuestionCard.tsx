@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CardProgress } from '../../services/activeSessionStorage';
 import { playSound } from '../../services/soundEffects';
 import type { Question } from '../../types';
 import CardBack from './CardBack';
@@ -25,6 +26,10 @@ interface QuestionCardProps {
   soundEffects?: boolean;
   /** Move keyboard focus to the problem when the card appears (for every card after the first). */
   focusOnMount?: boolean;
+  /** Where to start, such as a card restored after a page refresh. */
+  initialProgress?: CardProgress;
+  /** Called when the student selects an answer or flips the card, so it can be saved. */
+  onProgressChange?: (progress: CardProgress) => void;
 }
 
 /**
@@ -55,9 +60,13 @@ function QuestionCard({
   showExplanation = true,
   soundEffects = false,
   focusOnMount = false,
+  initialProgress,
+  onProgressChange,
 }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(
+    initialProgress?.selectedAnswer ?? null,
+  );
+  const [isFlipped, setIsFlipped] = useState(initialProgress?.isFlipped ?? false);
   const frontHeadingRef = useRef<HTMLHeadingElement>(null);
   const backHeadingRef = useRef<HTMLHeadingElement>(null);
   const choiceButtons = useRef<(HTMLButtonElement | null)[]>([]);
@@ -97,23 +106,26 @@ function QuestionCard({
       }
       event.preventDefault();
       setSelectedAnswer(question.choices[index]);
+      onProgressChange?.({ selectedAnswer: question.choices[index], isFlipped: false });
       // Move focus to the chosen answer so screen readers announce it.
       choiceButtons.current[index]?.focus();
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFlipped, question.choices]);
+  }, [isFlipped, question.choices, onProgressChange]);
 
   function handleSelect(answer: number) {
     if (!isFlipped) {
       setSelectedAnswer(answer);
+      onProgressChange?.({ selectedAnswer: answer, isFlipped: false });
     }
   }
 
   function handleFlip() {
     if (selectedAnswer !== null) {
       setIsFlipped(true);
+      onProgressChange?.({ selectedAnswer, isFlipped: true });
       if (soundEffects) {
         playSound('flip');
       }

@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useBlocker, useLocation, useNavigate, type BlockerFunction } from 'react-router';
 import { useAppData } from '../app/AppDataContext';
 import { ROUTES, type PracticeSetupState, type SessionSummaryState } from '../app/routes';
 import { Button, ButtonLink } from '../components/common/Button';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import EmptyState from '../components/common/EmptyState';
 import PageContainer from '../components/layout/PageContainer';
 import ProgressBar from '../components/practice/ProgressBar';
@@ -43,17 +44,37 @@ function PracticePage() {
     );
   }
 
-  // Keyed by the history entry, so every navigation here starts a fresh session.
-  return <PracticeSessionView key={location.key} config={location.state} />;
+  // Keyed by the history entry: every navigation here starts a fresh session,
+  // while a refresh (same entry) restores the session in progress.
+  return (
+    <PracticeSessionView key={location.key} config={location.state} locationKey={location.key} />
+  );
 }
 
-function PracticeSessionView({ config }: { config: PracticeConfig }) {
+interface PracticeSessionViewProps {
+  config: PracticeConfig;
+  locationKey: string;
+}
+
+function PracticeSessionView({ config, locationKey }: PracticeSessionViewProps) {
   const navigate = useNavigate();
   const { settings } = useAppData();
-  const practice = usePracticeSession(config);
+  const practice = usePracticeSession(config, { locationKey });
   const { session, attempts, currentQuestion, isActive, questionNumber, totalQuestions } = practice;
   const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  // Warn before leaving a session with answered questions, whether by a link
+  // or the browser's Back button. Finished sessions and sessions with nothing
+  // answered yet leave without a warning.
+  const shouldWarnBeforeLeaving: BlockerFunction = ({ currentLocation, nextLocation }) =>
+    isActive && session.attempted > 0 && currentLocation.pathname !== nextLocation.pathname;
+  const blocker = useBlocker(shouldWarnBeforeLeaving);
+
+  function handleLeave() {
+    practice.leaveSession();
+    blocker.proceed?.();
+  }
 
   // When the session ends, show its summary. Replacing this history entry
   // means the browser's Back button won't return to a finished session.
@@ -115,6 +136,8 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
         questionNumber={questionNumber}
         totalQuestions={totalQuestions}
         onResult={handleResult}
+        initialProgress={practice.cardProgress}
+        onProgressChange={practice.updateCardProgress}
         animated={settings.cardAnimationsEnabled}
         showExplanation={settings.showExplanations}
         soundEffects={settings.soundEffectsEnabled}
@@ -134,6 +157,21 @@ function PracticeSessionView({ config }: { config: PracticeConfig }) {
           </Button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={blocker.state === 'blocked'}
+        title="Leave this session?"
+        message={
+          <p>
+            You have answered {formatQuestionCount(session.attempted)}. Your answers so far are
+            saved, but this session will end.
+          </p>
+        }
+        confirmLabel="End Session and Leave"
+        cancelLabel="Keep Practicing"
+        onConfirm={handleLeave}
+        onCancel={() => blocker.reset?.()}
+      />
     </PageContainer>
   );
 }
