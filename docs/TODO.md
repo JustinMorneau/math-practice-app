@@ -857,10 +857,10 @@ Initial routes:
 ### 87. Complete Browser Testing
 
 - [x] Test in Chrome.
-- [ ] Test in Safari. _(Needs an iPhone, iPad, or Mac.)_
+- [x] Test in Safari.
 - [x] Test in Firefox.
 - [x] Test in Microsoft Edge.
-- [ ] Test on an iPad or tablet emulator. _(Chrome's device toolbar can emulate an iPad.)_
+- [x] Test on an iPad or tablet emulator. _(iPad emulation in the browser's device toolbar.)_
 - [x] Test on a mobile device or emulator. _(Tested on a phone.)_
 
 ### 88. Prepare the Production Build
@@ -879,7 +879,7 @@ Initial routes:
 - [x] Verify every route. _(Each route loads directly and after a refresh.)_
 - [x] Verify local-storage persistence.
 - [x] Verify responsive behavior. _(Checked on a phone.)_
-- [ ] Verify that no development errors appear in the console. _(The app logs no errors. Netlify's review toolbar (Netlify Drawer) was blocked by the Content Security Policy; it has been turned off, and the console should be clean after the next deploy.)_
+- [ ] Verify that no development errors appear in the console. _(The app logs no errors. The only messages come from Netlify's heads-up display, which Netlify adds to the published page and the Content Security Policy blocks; it is being turned off in Netlify's Collaboration tools settings.)_
 
 ---
 
