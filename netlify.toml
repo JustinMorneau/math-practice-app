@@ -1,0 +1,35 @@
+# Netlify deployment settings (https://docs.netlify.com/configure-builds/file-based-configuration/)
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Matches the "engines" field in package.json.
+  NODE_VERSION = "22"
+
+# React Router handles every route in the browser. Send any path that is not
+# a real file (such as /statistics after a refresh) to index.html, so the app
+# can show the right page, or its own "Page not found" screen.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security and privacy headers for every page.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # The app loads only its own files: no third-party scripts, fonts,
+    # trackers, or ads, and it never sends data anywhere.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()"
+
+# Built files have a content hash in their names, so browsers can keep them
+# for a long time; a new release uses new names.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
