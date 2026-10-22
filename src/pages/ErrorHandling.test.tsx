@@ -12,7 +12,7 @@ import { loadMistakePatterns } from '../services/mistakeStorage';
 import { loadSettings } from '../services/settingsStorage';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
-import { MemoryStorage } from '../test/storage';
+import { CURRENT_VERSION_RECORD, MemoryStorage } from '../test/storage';
 import ErrorPage from './ErrorPage';
 
 function Broken(): never {
@@ -94,7 +94,7 @@ describe('damaged saved data', () => {
     expect(loadSettings(storage).settings).toEqual(DEFAULT_SETTINGS);
     expect(loadMistakePatterns(storage).patterns).toEqual([]);
     expect(loadAttempts(storage)).toEqual([]);
-    expect(browserStorage.getItem(STORAGE_KEYS.version)).toBe('{"version":1}');
+    expect(browserStorage.getItem(STORAGE_KEYS.version)).toBe(CURRENT_VERSION_RECORD);
   });
 
   it('lets the student practice and save progress again', async () => {

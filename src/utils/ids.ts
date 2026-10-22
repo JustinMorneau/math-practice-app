@@ -1,18 +1,28 @@
 let fallbackCounter = 0;
 
+/** Random bytes in each ID: 64 bits, so collisions are practically impossible. */
+const RANDOM_BYTES = 8;
+
 /**
- * A unique ID such as `"q-3f2b…"`, optionally with a readable prefix.
+ * A short unique ID such as `"q-3f2b9c41d07e5a68"`, optionally with a
+ * readable prefix. IDs are stored with every attempt, so they are kept short
+ * to keep saved progress compact.
  *
- * Uses crypto.randomUUID when available. Browsers only provide it on secure
- * pages (HTTPS or localhost), so opening the dev server from a tablet by IP
- * address over plain HTTP uses the fallback instead.
+ * Uses crypto.getRandomValues, which browsers provide on every page
+ * (including the dev server opened from a tablet over plain HTTP), with a
+ * fallback for environments without it.
  */
 export function createId(prefix?: string): string {
   const unique =
-    typeof globalThis.crypto?.randomUUID === 'function'
-      ? globalThis.crypto.randomUUID()
+    typeof globalThis.crypto?.getRandomValues === 'function'
+      ? createRandomId()
       : createFallbackId();
   return prefix ? `${prefix}-${unique}` : unique;
+}
+
+function createRandomId(): string {
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(RANDOM_BYTES));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function createFallbackId(): string {

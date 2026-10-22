@@ -7,7 +7,7 @@ import { loadSettings, saveSettings } from '../services/settingsStorage';
 import { recordAttempt } from '../services/attemptRecorder';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
-import { MemoryStorage } from '../test/storage';
+import { CURRENT_VERSION_RECORD, MemoryStorage } from '../test/storage';
 
 function setup() {
   const browserStorage = new MemoryStorage();
@@ -148,7 +148,7 @@ describe('Clearing all application data', () => {
     ]) {
       expect(browserStorage.getItem(key)).toBeNull();
     }
-    expect(browserStorage.getItem(STORAGE_KEYS.version)).toBe('{"version":1}');
+    expect(browserStorage.getItem(STORAGE_KEYS.version)).toBe(CURRENT_VERSION_RECORD);
     expect(browserStorage.getItem('otherApp.data')).toBe('keep me');
 
     // The app is back on its defaults, e.g. on the setup page.

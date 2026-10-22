@@ -7,7 +7,7 @@ import { loadMistakePatterns } from '../services/mistakeStorage';
 import { loadSettings } from '../services/settingsStorage';
 import { STORAGE_KEYS, createStorageService } from '../services/storageService';
 import { renderAppAt } from '../test/renderWithRouter';
-import { MemoryStorage } from '../test/storage';
+import { CURRENT_VERSION_RECORD, MemoryStorage } from '../test/storage';
 import type { PracticeConfig } from '../types';
 import { useAppData } from './AppDataContext';
 import AppProvider from './AppProvider';
@@ -50,7 +50,7 @@ describe('AppProvider', () => {
 
     renderAppAt('/', { storage: createStorageService(storage) });
 
-    expect(storage.getItem(STORAGE_KEYS.version)).toBe('{"version":1}');
+    expect(storage.getItem(STORAGE_KEYS.version)).toBe(CURRENT_VERSION_RECORD);
   });
 
   it('removes invalid mistake records when the app starts', () => {

@@ -3,12 +3,14 @@
  * 10.1, 10.2, 11, and 23). Saving is idempotent: saving the same session or
  * attempt again updates it rather than adding a duplicate.
  *
- * To keep storage compact, only the most recent records are kept. Aggregate
- * statistics (Phase 10) are stored separately, so trimming old records does
- * not change the student's all-time totals.
+ * To keep storage compact, attempts are saved in a compact array form (see
+ * attemptCodec) and only the most recent records are kept. Aggregate
+ * statistics are stored separately, so trimming old records does not change
+ * the student's all-time totals.
  */
 import type { PracticeAttempt, PracticeSession } from '../types';
-import { isPracticeAttempt, isPracticeSession } from '../utils/validation';
+import { isPracticeSession } from '../utils/validation';
+import { encodeAttempt, parseStoredAttempts } from './attemptCodec';
 import { STORAGE_KEYS, appStorage, type StorageService, type WriteResult } from './storageService';
 
 /** Most sessions kept in storage; the oldest are removed first. */
@@ -23,7 +25,6 @@ function parseList<T>(isValid: (item: unknown) => item is T) {
 }
 
 const parseSessions = parseList(isPracticeSession);
-const parseAttempts = parseList(isPracticeAttempt);
 
 export function loadSessions(storage: StorageService = appStorage): PracticeSession[] {
   return storage.read(STORAGE_KEYS.sessions, parseSessions, []).value;
@@ -52,9 +53,21 @@ export function saveSession(
   return storage.write(STORAGE_KEYS.sessions, sessions);
 }
 
-/** Attempts in the order they were answered. */
+/** Attempts in the order they were answered, from either stored form. */
 export function loadAttempts(storage: StorageService = appStorage): PracticeAttempt[] {
-  return storage.read(STORAGE_KEYS.attempts, parseAttempts, []).value;
+  return storage.read(STORAGE_KEYS.attempts, parseStoredAttempts, []).value;
+}
+
+/**
+ * Saves a full list of attempts in the compact stored form, keeping only the
+ * most recent `maxAttempts`.
+ */
+export function saveAttempts(
+  attempts: readonly PracticeAttempt[],
+  storage: StorageService = appStorage,
+  maxAttempts = MAX_STORED_ATTEMPTS,
+): WriteResult {
+  return storage.write(STORAGE_KEYS.attempts, attempts.slice(-maxAttempts).map(encodeAttempt));
 }
 
 /** Adds an attempt; does nothing if an attempt with the same id is already saved. */
@@ -67,5 +80,5 @@ export function saveAttempt(
   if (attempts.some(({ id }) => id === attempt.id)) {
     return { ok: true };
   }
-  return storage.write(STORAGE_KEYS.attempts, [...attempts, attempt].slice(-maxAttempts));
+  return saveAttempts([...attempts, attempt], storage, maxAttempts);
 }

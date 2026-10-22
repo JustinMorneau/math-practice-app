@@ -14,12 +14,16 @@ describe('createId', () => {
     expect(createId('q')).toMatch(/^q-\S+$/);
   });
 
+  it('is short, to keep saved progress compact', () => {
+    expect(createId('a')).toMatch(/^a-[0-9a-f]{16}$/);
+  });
+
   it('does not repeat', () => {
     const ids = new Set(Array.from({ length: 1000 }, () => createId()));
     expect(ids.size).toBe(1000);
   });
 
-  it('still creates unique ids when crypto.randomUUID is unavailable', () => {
+  it('still creates unique ids when crypto is unavailable', () => {
     vi.stubGlobal('crypto', {});
     const ids = new Set(Array.from({ length: 1000 }, () => createId('s')));
     expect(ids.size).toBe(1000);

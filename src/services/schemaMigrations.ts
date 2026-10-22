@@ -3,10 +3,11 @@
  * compared with the version this code expects, and migrations upgrade older
  * data one version at a time.
  */
+import { loadAttempts, saveAttempts } from './historyStorage';
 import { STORAGE_KEYS, appStorage, type StorageService } from './storageService';
 
 /** The data format this version of the app reads and writes. */
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /**
  * Upgrades stored data from `toVersion - 1` to `toVersion`. A migration
@@ -19,12 +20,22 @@ export interface Migration {
 }
 
 /**
- * Migrations in order. None are needed yet; when the data format changes,
- * add one here and raise CURRENT_SCHEMA_VERSION. For example:
- *
- *   { toVersion: 2, migrate: (storage) => { ...rename a field in sessions... } }
+ * Migrations in order. When the data format changes, add one here and raise
+ * CURRENT_SCHEMA_VERSION.
  */
-export const MIGRATIONS: readonly Migration[] = [];
+export const MIGRATIONS: readonly Migration[] = [
+  {
+    // Version 2 saves attempts in a compact array form (see attemptCodec).
+    // Loading accepts both forms, so this rewrites the old objects compactly.
+    toVersion: 2,
+    migrate: (storage) => {
+      const attempts = loadAttempts(storage);
+      if (attempts.length > 0) {
+        saveAttempts(attempts, storage);
+      }
+    },
+  },
+];
 
 export type SchemaStatus =
   /** Storage could not be used; nothing was checked or written. */

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryStorage } from '../test/storage';
+import type { PracticeAttempt } from '../types';
+import { loadAttempts } from './historyStorage';
 import { CURRENT_SCHEMA_VERSION, ensureSchemaVersion, type Migration } from './schemaMigrations';
 import { STORAGE_KEYS, createStorageService } from './storageService';
 
@@ -81,5 +83,47 @@ describe('ensureSchemaVersion', () => {
 
   it('reports unavailable storage without throwing', () => {
     expect(ensureSchemaVersion(createStorageService(null))).toBe('unavailable');
+  });
+});
+
+describe('version 2: compact attempts', () => {
+  const attempt: PracticeAttempt = {
+    id: 'a-6f1d0f6a-6a43-4a63-8f5e-0d53f2c4b5e1',
+    questionId: 'q-1c7a0f6a-6a43-4a63-8f5e-0d53f2c4b5e1',
+    operation: 'multiplication',
+    firstOperand: 8,
+    secondOperand: 7,
+    correctAnswer: 56,
+    selectedAnswer: 54,
+    selfReportedCorrect: false,
+    difficulty: 2,
+    source: 'regular',
+    attemptedAt: '2026-10-21T15:05:00.000Z',
+    sessionId: 's-2b7a0f6a-6a43-4a63-8f5e-0d53f2c4b5e1',
+  };
+
+  it('rewrites attempts saved by version 1 in the compact form, keeping every detail', () => {
+    const browserStorage = new MemoryStorage({
+      [STORAGE_KEYS.version]: '{"version":1}',
+      [STORAGE_KEYS.attempts]: JSON.stringify([attempt]),
+    });
+    const storage = createStorageService(browserStorage);
+    const before = browserStorage.getItem(STORAGE_KEYS.attempts) ?? '';
+
+    expect(ensureSchemaVersion(storage)).toBe('migrated');
+
+    const after = browserStorage.getItem(STORAGE_KEYS.attempts) ?? '';
+    expect(Array.isArray(JSON.parse(after)[0])).toBe(true);
+    expect(after.length).toBeLessThan(before.length);
+    expect(loadAttempts(storage)).toEqual([attempt]);
+    expect(storedVersion(browserStorage)).toEqual({ version: 2 });
+  });
+
+  it('writes nothing when there are no attempts', () => {
+    const browserStorage = new MemoryStorage({ [STORAGE_KEYS.version]: '{"version":1}' });
+
+    ensureSchemaVersion(createStorageService(browserStorage));
+
+    expect(browserStorage.getItem(STORAGE_KEYS.attempts)).toBeNull();
   });
 });

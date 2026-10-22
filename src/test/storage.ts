@@ -1,3 +1,8 @@
+import { CURRENT_SCHEMA_VERSION } from '../services/schemaMigrations';
+
+/** The version record the app writes for the current data format, e.g. '{"version":2}'. */
+export const CURRENT_VERSION_RECORD = JSON.stringify({ version: CURRENT_SCHEMA_VERSION });
+
 /** Ways a fake storage can fail, to test error handling. */
 export type StorageFailureMode = 'none' | 'quota-exceeded' | 'write-error' | 'read-error';
 
