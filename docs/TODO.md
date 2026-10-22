@@ -879,7 +879,7 @@ Initial routes:
 - [x] Verify every route. _(Each route loads directly and after a refresh.)_
 - [x] Verify local-storage persistence.
 - [x] Verify responsive behavior. _(Checked on a phone.)_
-- [ ] Verify that no development errors appear in the console. _(The app logs no errors. The only messages come from Netlify's heads-up display, which Netlify adds to the published page and the Content Security Policy blocks; it is being turned off in Netlify's Collaboration tools settings.)_
+- [x] Verify that no development errors appear in the console. _(The app logs no errors. Netlify's heads-up display was turned off. The two remaining messages come from the "Powered by Netlify" badge that Netlify adds to free-plan sites; the Content Security Policy blocks it, so it never appears. Known hosting limitation.)_
 
 ---
 
