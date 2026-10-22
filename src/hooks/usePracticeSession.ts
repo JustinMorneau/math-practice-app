@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { useAppData } from '../app/AppDataContext';
 import {
   clearActiveSession,
@@ -122,19 +122,26 @@ export function usePracticeSession(
   }
 
   const [state, dispatch] = useReducer(practiceSessionReducer, config, createInitialState);
-  const [cardProgress, setCardProgress] = useState<CardProgress>(
-    restored?.card ?? NO_CARD_PROGRESS,
-  );
+  // The current card's progress only needs saving, not displaying, so it is
+  // kept in a ref: selecting an answer or flipping the card re-renders just
+  // the card, not the whole practice page.
+  const cardProgress = useRef<CardProgress>(restored?.card ?? NO_CARD_PROGRESS);
 
   // Keep the saved copy of the session in progress up to date, and forget it
   // once the session ends.
   useEffect(() => {
     if (state.status === 'active') {
-      reportStorageResult(saveActiveSession({ locationKey, state, card: cardProgress }, storage));
+      const record = { locationKey, state, card: cardProgress.current };
+      reportStorageResult(saveActiveSession(record, storage));
     } else {
       clearActiveSession(storage);
     }
-  }, [state, cardProgress, locationKey, storage, reportStorageResult]);
+  }, [state, locationKey, storage, reportStorageResult]);
+
+  function updateCardProgress(progress: CardProgress) {
+    cardProgress.current = progress;
+    reportStorageResult(saveActiveSession({ locationKey, state, card: progress }, storage));
+  }
 
   // Saving is idempotent, so effects running twice in development are harmless.
   useEffect(() => {
@@ -163,7 +170,7 @@ export function usePracticeSession(
       ? state.currentQuestion
       : chooseNextQuestion(state.config, state.currentQuestion, context);
 
-    setCardProgress(NO_CARD_PROGRESS);
+    cardProgress.current = NO_CARD_PROGRESS;
     dispatch({ type: 'record-attempt', attempt, nextQuestion });
   }
 
@@ -191,9 +198,10 @@ export function usePracticeSession(
     /** One-based number of the question being shown. */
     questionNumber: state.session.attempted + 1,
     totalQuestions: getTotalQuestions(state.session.sessionLength),
-    /** The current card's selected answer and flip state, as last saved. */
-    cardProgress,
-    updateCardProgress: setCardProgress,
+    /** Where the current card starts: its saved progress if it was restored after a refresh. */
+    initialCardProgress:
+      restored?.state.currentQuestion.id === state.currentQuestion.id ? restored.card : undefined,
+    updateCardProgress,
     recordResult,
     endSession,
     leaveSession,

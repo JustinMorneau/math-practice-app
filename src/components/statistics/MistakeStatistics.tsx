@@ -1,6 +1,6 @@
+import { useMemo } from 'react';
 import {
   formatMistakeFact,
-  getMostMissedFacts,
   getMostMissedOperations,
   sortByMostMissed,
   summarizeMistakes,
@@ -16,6 +16,9 @@ interface MistakeStatisticsProps {
   statistics: AppStatistics;
   masteryThreshold: number;
 }
+
+/** How many of the most missed facts to list. */
+const MOST_MISSED_FACTS_SHOWN = 5;
 
 /** "Mastered", or review progress such as "1 of 3 right". */
 function formatProgress(pattern: MistakePattern, masteryThreshold: number): string {
@@ -40,6 +43,12 @@ function MistakeStatistics({
   statistics,
   masteryThreshold,
 }: MistakeStatisticsProps) {
+  // Sorting and summarizing hundreds of mistakes is only redone when the
+  // underlying data changes, not on every re-render of the page.
+  const summary = useMemo(() => summarizeMistakes(patterns, attempts), [patterns, attempts]);
+  const mostMissedOperations = useMemo(() => getMostMissedOperations(statistics), [statistics]);
+  const sorted = useMemo(() => sortByMostMissed(patterns), [patterns]);
+
   if (patterns.length === 0) {
     return (
       <p className={styles.empty}>
@@ -49,9 +58,6 @@ function MistakeStatistics({
     );
   }
 
-  const summary = summarizeMistakes(patterns, attempts);
-  const mostMissedOperations = getMostMissedOperations(statistics);
-  const sorted = sortByMostMissed(patterns);
   const active = sorted.filter(({ mastered }) => !mastered);
   const mastered = sorted.filter((pattern) => pattern.mastered);
 
@@ -75,7 +81,7 @@ function MistakeStatistics({
       <div className={styles.group}>
         <h3>Most missed facts</h3>
         <ol className={styles.topFacts}>
-          {getMostMissedFacts(patterns).map((pattern) => (
+          {sorted.slice(0, MOST_MISSED_FACTS_SHOWN).map((pattern) => (
             <li key={pattern.id}>
               <span className={styles.fact}>{formatMistakeFact(pattern)}</span>
               <span className={styles.detail}>missed {formatTimes(pattern.incorrectCount)}</span>

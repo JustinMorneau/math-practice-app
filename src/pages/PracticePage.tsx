@@ -136,7 +136,7 @@ function PracticeSessionView({ config, locationKey }: PracticeSessionViewProps) 
         questionNumber={questionNumber}
         totalQuestions={totalQuestions}
         onResult={handleResult}
-        initialProgress={practice.cardProgress}
+        initialProgress={practice.initialCardProgress}
         onProgressChange={practice.updateCardProgress}
         animated={settings.cardAnimationsEnabled}
         showExplanation={settings.showExplanations}
