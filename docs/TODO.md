@@ -724,19 +724,19 @@ Initial routes:
 
 ### 74. Persist an Active Session
 
-- [ ] Save the active session.
-- [ ] Save the current question.
-- [ ] Save the selected answer when appropriate.
-- [ ] Restore the session after a page refresh.
-- [ ] Clear restored state when the session ends.
+- [x] Save the active session.
+- [x] Save the current question.
+- [x] Save the selected answer when appropriate.
+- [x] Restore the session after a page refresh.
+- [x] Clear restored state when the session ends.
 
 ### 75. Protect Against Accidental Navigation
 
-- [ ] Detect attempts to leave an active session.
-- [ ] Display a confirmation prompt.
-- [ ] Allow the user to continue the session.
-- [ ] Allow the user to end and leave the session.
-- [ ] Avoid showing warnings after session completion.
+- [x] Detect attempts to leave an active session.
+- [x] Display a confirmation prompt.
+- [x] Allow the user to continue the session.
+- [x] Allow the user to end and leave the session.
+- [x] Avoid showing warnings after session completion.
 
 ---
 
@@ -744,28 +744,28 @@ Initial routes:
 
 ### 76. Handle Invalid Stored Data
 
-- [ ] Detect invalid settings.
-- [ ] Detect invalid attempts.
-- [ ] Detect invalid sessions.
-- [ ] Detect invalid mistake patterns.
-- [ ] Reset only the affected data category.
-- [ ] Avoid crashing the application.
+- [x] Detect invalid settings.
+- [x] Detect invalid attempts.
+- [x] Detect invalid sessions.
+- [x] Detect invalid mistake patterns.
+- [x] Reset only the affected data category.
+- [x] Avoid crashing the application.
 
 ### 77. Handle Question-Generation Failures
 
-- [ ] Validate every generated question.
-- [ ] Retry generation after an invalid result.
-- [ ] Set a maximum retry count.
-- [ ] Provide a fallback question.
-- [ ] Log useful development errors.
+- [x] Validate every generated question.
+- [x] Retry generation after an invalid result. _(Built in Phases 4–5: up to 10 attempts, then a known-good fallback.)_
+- [x] Set a maximum retry count.
+- [x] Provide a fallback question.
+- [x] Log useful development errors.
 
 ### 78. Add User-Friendly Error Messages
 
-- [ ] Add a general error component.
-- [ ] Explain storage errors in simple language.
-- [ ] Explain missing-session errors.
-- [ ] Provide a safe way to return home.
-- [ ] Avoid exposing technical stack traces.
+- [x] Add a general error component.
+- [x] Explain storage errors in simple language. _(Storage warning banner from Phase 9.)_
+- [x] Explain missing-session errors. _(Setup-page notice and summary message from Phases 7–8.)_
+- [x] Provide a safe way to return home.
+- [x] Avoid exposing technical stack traces.
 
 ---
 
@@ -773,47 +773,47 @@ Initial routes:
 
 ### 79. Complete Unit Tests
 
-- [ ] Test all arithmetic generators.
-- [ ] Test difficulty boundaries.
-- [ ] Test distractor generation.
-- [ ] Test answer-choice uniqueness.
-- [ ] Test statistics calculations.
-- [ ] Test mistake-pattern updates.
-- [ ] Test similar-question generation.
-- [ ] Test mastery rules.
-- [ ] Test storage serialization and validation.
+- [x] Test all arithmetic generators.
+- [x] Test difficulty boundaries.
+- [x] Test distractor generation.
+- [x] Test answer-choice uniqueness.
+- [x] Test statistics calculations.
+- [x] Test mistake-pattern updates.
+- [x] Test similar-question generation.
+- [x] Test mastery rules.
+- [x] Test storage serialization and validation.
 
 ### 80. Complete Component Tests
 
-- [ ] Test operation selection.
-- [ ] Test difficulty selection.
-- [ ] Test answer selection.
-- [ ] Test card flipping.
-- [ ] Test right and wrong buttons.
-- [ ] Test progress updates.
-- [ ] Test session completion.
-- [ ] Test statistics display.
-- [ ] Test confirmation dialogs.
+- [x] Test operation selection.
+- [x] Test difficulty selection.
+- [x] Test answer selection.
+- [x] Test card flipping.
+- [x] Test right and wrong buttons.
+- [x] Test progress updates.
+- [x] Test session completion.
+- [x] Test statistics display.
+- [x] Test confirmation dialogs.
 
 ### 81. Complete Integration Tests
 
-- [ ] Test a full addition session.
-- [ ] Test a mixed-operation session.
-- [ ] Test continuous practice.
-- [ ] Test an incorrect answer creating a mistake pattern.
-- [ ] Test mistake-review generation.
-- [ ] Test mastery completion.
-- [ ] Test persistence after a browser refresh.
-- [ ] Test resetting statistics.
+- [x] Test a full addition session.
+- [x] Test a mixed-operation session.
+- [x] Test continuous practice.
+- [x] Test an incorrect answer creating a mistake pattern.
+- [x] Test mistake-review generation.
+- [x] Test mastery completion.
+- [x] Test persistence after a browser refresh.
+- [x] Test resetting statistics.
 
 ### 82. Complete Accessibility Testing
 
-- [ ] Complete a session using only the keyboard.
-- [ ] Test with a screen reader.
-- [ ] Test reduced-motion mode.
-- [ ] Test browser zoom.
-- [ ] Run an automated accessibility checker.
-- [ ] Manually review reported issues.
+- [x] Complete a session using only the keyboard.
+- [x] Test with a screen reader. _(Checked with Narrator during Phase 16.)_
+- [x] Test reduced-motion mode. _(Checked in Chromium during Phase 16.)_
+- [x] Test browser zoom. _(200% and 400% zoom checked during Phase 16.)_
+- [x] Run an automated accessibility checker. _(axe-core checks in `src/app/Accessibility.test.tsx`.)_
+- [ ] Manually review reported issues. _(After the first axe-core run on a development machine.)_
 
 ---
 
